@@ -12,14 +12,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with true to check for existing token
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      fetchProfile();
-    }
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      const savedUser = localStorage.getItem('authUser');
+      
+      if (token && savedUser) {
+        try {
+          setAuthToken(token);
+          const userData = JSON.parse(savedUser);
+          setUser(userData);
+          setIsAuthenticated(true);
+          
+          // Optionally try to refresh user data from server
+          // but don't logout if it fails
+          try {
+            await fetchProfile();
+          } catch (error) {
+            // If profile fetch fails, keep using cached user data
+            console.warn('Failed to refresh profile, using cached data');
+          }
+        } catch (error) {
+          // If there's an error with cached data, clear it
+          logout();
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const handleError = (error: unknown) => {
@@ -43,7 +67,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data } = await api.post('/Auth/authentication', { userName, password });
       console.log(" response data ", data);
       
+      // Save both token and user data
       setAuthToken(data.token);
+      localStorage.setItem('authUser', JSON.stringify(data.user));
+      
       setUser(data.user);
       setIsAuthenticated(true);
       return true;
@@ -62,7 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { data } = await api.post('/registration', userData);
       
+      // Save both token and user data
       setAuthToken(data.token);
+      localStorage.setItem('authUser', JSON.stringify(data.user));
+      
       setUser(data.user);
       setIsAuthenticated(true);
       return true;
@@ -91,22 +121,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (): Promise<void> => {
     try {
-      setIsLoading(true);
       setError(null);
       
       const { data } = await api.get('/profile');
       setUser(data);
       setIsAuthenticated(true);
+      
+      // Update cached user data
+      localStorage.setItem('authUser', JSON.stringify(data));
     } catch (error) {
-      handleError(error);
-      logout();
-    } finally {
-      setIsLoading(false);
+      // Don't logout on profile fetch failure during initialization
+      // Only throw error if this is called explicitly
+      throw error;
     }
   };
 
   const logout = (): void => {
     setAuthToken(null);
+    localStorage.removeItem('authUser');
     setUser(null);
     setIsAuthenticated(false);
     setError(null);
