@@ -9,18 +9,22 @@ export interface Circular {
 }
 
 export interface ExecutiveProgram {
-  id: string
-  title: string
-  description: string
-  duration: string
-  fee: number
-  programType: string
-  startDate: string
-  endDate: string
-  capacity: number
-  enrolled: number
-  instructor: string
-  level: string
+  id: number;
+  programsName: string;
+  executiveProgramTypeId: number;
+  startDate: string | Date;  // Can be string or Date object
+  startDateDescription: string;
+  endDate: string | Date | null;
+  programDuration: number | null;
+  classCount: string;
+  classSchedule: string;
+  totalHours: number;
+  regCost: number;
+  discoutPC: number;
+  iubStudentDiscoutPC: number;
+  regCostDescription: string;
+  isRunning: boolean;
+  isSuccessfullyEPRegistration: boolean | null;
 }
 
 export interface ProgramType {

@@ -220,7 +220,7 @@ const DashboardPage: React.FC = () => {
           )}
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {programs.length > 0 ? (
+             {programs && programs?.length > 0 ? (
               programs.filter(program => program.isRunning).map((program) => (
                 <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] hover:shadow-md transition-all duration-200">
                   <div className="flex items-start justify-between mb-3">
@@ -280,7 +280,7 @@ const DashboardPage: React.FC = () => {
             )}
           </div>
           
-          {programs.length > 0 && (
+          {programs?.length > 0 && (
             <div className="mt-6 text-center">
               <Link
                 to="/courses"
