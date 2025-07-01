@@ -19,16 +19,12 @@ const DashboardPage: React.FC = () => {
   } = useAppSelector((state) => state.circular)
   
   const { 
-    programs, 
-    programTypes, 
     loading: programLoading, 
     error: programError 
   } = useAppSelector((state) => state.executiveProgram)
 
   useEffect(() => {
-    dispatch(fetchCirculars())
     dispatch(fetchExecutivePrograms())
-    dispatch(fetchProgramTypes())
   }, [dispatch])
 
   const dashboardStats = [
@@ -256,29 +252,6 @@ const DashboardPage: React.FC = () => {
                 {programError}
               </div>
             )}
-            
-            <div className="space-y-4">
-              {programs.length > 0 ? (
-                programs.slice(0, 3).map((program) => (
-                  <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] transition-colors">
-                    <h4 className="font-medium text-gray-800 mb-1">{program.title}</h4>
-                    <p className="text-sm text-gray-600 mb-2">{program.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-[#00c0ef]">
-                        ৳{program.fee.toLocaleString()}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {program.duration}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                !programLoading && (
-                  <p className="text-gray-500 text-center py-4">No programs available</p>
-                )
-              )}
-            </div>
           </div>
         </div>
 
