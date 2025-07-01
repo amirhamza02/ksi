@@ -24,5 +24,3 @@ export const executiveProgramApi = {
     return response.data.data
   },
 }
-
-export default api
