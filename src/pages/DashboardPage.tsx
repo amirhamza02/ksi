@@ -4,8 +4,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { fetchExecutivePrograms } from '../store/slices/executiveProgramSlice'
+import { paymentApi } from '../services/paymentApi'
 import Header from '../components/Header'
-import api from '../lib/api'
 import { User, BookOpen, Clock, Users, Calendar, Star, CreditCard, CheckCircle } from 'lucide-react'
 
 const DashboardPage: React.FC = () => {
@@ -25,14 +25,16 @@ const DashboardPage: React.FC = () => {
   }, [dispatch])
 
   const handlePayment = async (programId: number) => {
+    if (!user?.id) return;
+    
     setPaymentLoading(programId)
     try {
-      const response = await api.post('/Payment/pay-reg-bill', {
+      const response = await paymentApi.payRegistrationBill({
         programId: programId,
-        userId: user?.id
+        userId: user.id
       })
       
-      if (response.data.success) {
+      if (response.success) {
         setPaymentSuccess(prev => [...prev, programId])
         // Optionally refresh programs to get updated registration status
         dispatch(fetchExecutivePrograms())
