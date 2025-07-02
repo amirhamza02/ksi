@@ -206,7 +206,7 @@ const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center">
               <BookOpen className="w-5 h-5 mr-2 text-[#00c0ef]" />
-              Available Korean Courses
+              Registared Course(s)
             </h2>
             {programLoading && (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00c0ef]"></div>
@@ -264,7 +264,7 @@ const DashboardPage: React.FC = () => {
                       to="/courses"
                       className="text-[#00c0ef] hover:text-cyan-600 text-sm font-medium flex items-center space-x-1 transition-colors"
                     >
-                      <span>Select</span>
+                      <span>Payment</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
@@ -286,7 +286,7 @@ const DashboardPage: React.FC = () => {
                 to="/courses"
                 className="inline-flex items-center text-[#00c0ef] hover:text-cyan-600 font-medium transition-colors"
               >
-                View All Courses
+                Avialable Offer Courses
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
             </div>
