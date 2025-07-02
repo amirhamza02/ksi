@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { LogOut, User, BookOpen, CreditCard } from 'lucide-react'
+import { LogOut, User, BookOpen } from 'lucide-react'
 
 const Header: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth()
@@ -55,10 +55,6 @@ const Header: React.FC = () => {
                 <Link to="/courses" className="text-gray-500 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center">
                   <BookOpen className="w-4 h-4 mr-1" />
                   Courses
-                </Link>
-                <Link to="/payment" className="text-gray-500 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center">
-                  <CreditCard className="w-4 h-4 mr-1" />
-                  Payment
                 </Link>
               </nav>
               <button

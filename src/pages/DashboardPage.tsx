@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { fetchExecutivePrograms } from '../store/slices/executiveProgramSlice'
 import Header from '../components/Header'
-import { User, BookOpen, CreditCard, Clock, Users, Calendar, Star, ArrowRight } from 'lucide-react'
+import api from '../lib/api'
+import { User, BookOpen, Clock, Users, Calendar, Star, CreditCard, CheckCircle } from 'lucide-react'
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth()
   const dispatch = useAppDispatch()
+  const [paymentLoading, setPaymentLoading] = useState<number | null>(null)
+  const [paymentSuccess, setPaymentSuccess] = useState<number[]>([])
   
   const { 
     programs, 
@@ -20,6 +23,27 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchExecutivePrograms())
   }, [dispatch])
+
+  const handlePayment = async (programId: number) => {
+    setPaymentLoading(programId)
+    try {
+      const response = await api.post('/Payment/pay-reg-bill', {
+        programId: programId,
+        userId: user?.id
+      })
+      
+      if (response.data.success) {
+        setPaymentSuccess(prev => [...prev, programId])
+        // Optionally refresh programs to get updated registration status
+        dispatch(fetchExecutivePrograms())
+      }
+    } catch (error) {
+      console.error('Payment failed:', error)
+      // Handle error - could show a toast notification
+    } finally {
+      setPaymentLoading(null)
+    }
+  }
 
   const dashboardStats = [
     {
@@ -33,21 +57,12 @@ const DashboardPage: React.FC = () => {
     },
     {
       title: 'Course Registration',
-      value: 'Not Selected',
+      value: 'Available',
       icon: BookOpen,
       color: 'text-[#00c0ef]',
       bgColor: 'bg-cyan-50',
-      action: 'Select Course',
+      action: 'View Courses',
       link: '/courses'
-    },
-    {
-      title: 'Payment Status',
-      value: 'Pending',
-      icon: CreditCard,
-      color: 'text-red-500',
-      bgColor: 'bg-red-50',
-      action: 'Make Payment',
-      link: '/payment'
     }
   ]
 
@@ -85,7 +100,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           {dashboardStats.map((stat, index) => (
             <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
@@ -132,34 +147,11 @@ const DashboardPage: React.FC = () => {
                   <div className="flex items-center space-x-3">
                     <BookOpen className="w-8 h-8 text-gray-400 group-hover:text-[#00c0ef] transition-colors" />
                     <div>
-                      <h3 className="font-medium text-gray-800">Select Course</h3>
-                      <p className="text-sm text-gray-600">Choose your Korean course</p>
+                      <h3 className="font-medium text-gray-800">Browse Courses</h3>
+                      <p className="text-sm text-gray-600">View available Korean courses</p>
                     </div>
                   </div>
                 </Link>
-
-                <Link
-                  to="/payment"
-                  className="p-4 border border-gray-100 rounded-lg hover:border-[#00c0ef] hover:bg-cyan-50 transition-all duration-200 group"
-                >
-                  <div className="flex items-center space-x-3">
-                    <CreditCard className="w-8 h-8 text-gray-400 group-hover:text-[#00c0ef] transition-colors" />
-                    <div>
-                      <h3 className="font-medium text-gray-800">Make Payment</h3>
-                      <p className="text-sm text-gray-600">Pay course fees securely</p>
-                    </div>
-                  </div>
-                </Link>
-
-                <div className="p-4 border border-gray-100 rounded-lg bg-gray-50">
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="w-8 h-8 text-gray-400" />
-                    <div>
-                      <h3 className="font-medium text-gray-500">Get Confirmation</h3>
-                      <p className="text-sm text-gray-500">Receive email confirmation</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -172,10 +164,10 @@ const DashboardPage: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex justify-between text-sm text-gray-600 mb-2">
                     <span>Progress</span>
-                    <span>25%</span>
+                    <span>50%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-[#00c0ef] h-2 rounded-full transition-all duration-300" style={{ width: '25%' }}></div>
+                    <div className="bg-[#00c0ef] h-2 rounded-full transition-all duration-300" style={{ width: '50%' }}></div>
                   </div>
                 </div>
               </div>
@@ -189,24 +181,20 @@ const DashboardPage: React.FC = () => {
                   <span className="text-sm text-gray-600">Complete Profile</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                  <span className="text-sm text-gray-400">Select Course</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                  <span className="text-sm text-gray-400">Make Payment</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Browse Courses</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Available Courses Section */}
+        {/* Registered Courses Section */}
         <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center">
               <BookOpen className="w-5 h-5 mr-2 text-[#00c0ef]" />
-              Registared Course(s)
+              Registered Courses
             </h2>
             {programLoading && (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00c0ef]"></div>
@@ -220,7 +208,7 @@ const DashboardPage: React.FC = () => {
           )}
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-             {programs && programs?.length > 0 ? (
+            {programs && programs?.length > 0 ? (
               programs.filter(program => program.isRunning).map((program) => (
                 <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] hover:shadow-md transition-all duration-200">
                   <div className="flex items-start justify-between mb-3">
@@ -260,13 +248,27 @@ const DashboardPage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <Link
-                      to="/courses"
-                      className="text-[#00c0ef] hover:text-cyan-600 text-sm font-medium flex items-center space-x-1 transition-colors"
-                    >
-                      <span>Payment</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                    
+                    {program.isSuccessfullyEPRegistration ? (
+                      <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Paid</span>
+                      </div>
+                    ) : paymentSuccess.includes(program.id) ? (
+                      <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Paid</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handlePayment(program.id)}
+                        disabled={paymentLoading === program.id}
+                        className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        <CreditCard className="w-3 h-3" />
+                        <span>{paymentLoading === program.id ? 'Processing...' : 'Pay Now'}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -286,8 +288,7 @@ const DashboardPage: React.FC = () => {
                 to="/courses"
                 className="inline-flex items-center text-[#00c0ef] hover:text-cyan-600 font-medium transition-colors"
               >
-                Avialable Offer Courses
-                <ArrowRight className="w-4 h-4 ml-1" />
+                View All Available Courses →
               </Link>
             </div>
           )}

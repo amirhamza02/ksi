@@ -8,7 +8,6 @@ import RegisterPage from './pages/Auth/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import ProfilePage from './pages/Profile/ProfilePage'
 import CoursePage from './pages/Course/CoursePage'
-import PaymentPage from './pages/Payments/PaymentPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -33,11 +32,6 @@ function App() {
             <Route path="/courses" element={
               <ProtectedRoute>
                 <CoursePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/payment" element={
-              <ProtectedRoute>
-                <PaymentPage />
               </ProtectedRoute>
             } />
           </Routes>
