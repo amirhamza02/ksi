@@ -37,58 +37,6 @@ const CoursePage: React.FC = () => {
     return 'Unknown'
   }
 
-  const getDescription = (programName: string) => {
-    if (programName.includes('Level 1A')) {
-      return 'Learn basic Korean alphabet (Hangul), basic greetings, and simple conversations. Perfect for absolute beginners.'
-    } else if (programName.includes('Level 1B')) {
-      return 'Build upon Level 1A knowledge with more vocabulary and basic grammar patterns.'
-    } else if (programName.includes('Level 2A')) {
-      return 'Develop intermediate speaking and listening skills with focus on practical communication.'
-    } else if (programName.includes('Level 2B')) {
-      return 'Advanced intermediate level with complex grammar and extended vocabulary.'
-    } else if (programName.includes('Level 3A')) {
-      return 'Master advanced Korean with focus on academic and professional communication.'
-    } else if (programName.includes('Level 3B')) {
-      return 'Highest level with advanced literature analysis and professional Korean.'
-    }
-    return 'Comprehensive Korean language course designed to enhance your language skills.'
-  }
-
-  const getFeatures = (programName: string) => {
-    if (programName.includes('Level 1')) {
-      return [
-        'Hangul reading and writing',
-        'Basic vocabulary (500+ words)',
-        'Simple sentence structures',
-        'Cultural introduction',
-        'Interactive speaking practice'
-      ]
-    } else if (programName.includes('Level 2')) {
-      return [
-        'Advanced grammar patterns',
-        'Extended vocabulary (1000+ words)',
-        'Past and future tenses',
-        'Daily conversation practice',
-        'Korean culture deep dive'
-      ]
-    } else if (programName.includes('Level 3')) {
-      return [
-        'Academic Korean writing',
-        'Professional communication',
-        'Literature analysis',
-        'Advanced grammar mastery',
-        'TOPIK Level 5-6 preparation'
-      ]
-    }
-    return [
-      'Comprehensive curriculum',
-      'Expert instruction',
-      'Interactive learning',
-      'Cultural immersion',
-      'Progress tracking'
-    ]
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -114,107 +62,86 @@ const CoursePage: React.FC = () => {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {programs && programs?.length > 0 ? (
-            programs.filter(program => program.isRunning).map((program) => (
-              <div
-                key={program.id}
-                className="bg-white rounded-lg card-shadow p-6 hover:shadow-lg transition-all duration-200"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getLevelColor(program.programsName)}`}>
-                        {getLevel(program.programsName)}
-                      </span>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-600">4.8</span>
-                      </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {programs && programs?.length > 0 ? (
+              programs.filter(program => program.isRunning).map((program) => (
+                <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] hover:shadow-md transition-all duration-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(program.programsName)}`}>
+                      {getLevel(program.programsName)}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                      <span className="text-xs text-gray-600">4.8</span>
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{program.programsName}</h3>
-                    <p className="text-gray-600 mb-4">{getDescription(program.programsName)}</p>
+                  </div>
+                  
+                  <h4 className="font-medium text-gray-900 mb-2">{program.programsName}</h4>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center space-x-2 text-xs text-gray-600">
+                      <Clock className="w-3 h-3" />
+                      <span>{program.totalHours} hours total</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs text-gray-600">
+                      <Users className="w-3 h-3" />
+                      <span>{program.classCount} classes</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs text-gray-600">
+                      <Calendar className="w-3 h-3" />
+                      <span>Starts: {program.startDateDescription}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-lg font-bold text-gray-900">৳{program.regCost.toLocaleString()}</span>
+                      <span className="text-gray-600 text-sm ml-1">BDT</span>
+                      {program.discoutPC > 0 && (
+                        <div className="text-xs text-green-600">
+                          {program.discoutPC}% discount available
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-right">
+                      {program.isSuccessfullyEPRegistration ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Registered
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Available
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span>{program.totalHours} hours</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Users className="w-4 h-4" />
-                    <span>{program.classCount} classes</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-xs">Starts: {program.startDateDescription}</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Schedule:</span> {program.classSchedule || 'TBA'}
-                  </div>
+              ))
+            ) : (
+              !programLoading && (
+                <div className="col-span-full text-center py-12">
+                  <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Courses Available</h3>
+                  <p className="text-gray-500">Please check back later for new course offerings.</p>
                 </div>
+              )
+            )}
+          </div>
 
-                <div className="mb-4">
-                  <h4 className="font-medium text-gray-900 mb-2">Course Features:</h4>
-                  <ul className="space-y-1">
-                    {getFeatures(program.programsName).map((feature, index) => (
-                      <li key={index} className="flex items-center space-x-2 text-sm text-gray-600">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></div>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div>
-                    <span className="text-2xl font-bold text-gray-900">৳{program.regCost.toLocaleString()}</span>
-                    <span className="text-gray-600 ml-1">BDT</span>
-                    {program.discoutPC > 0 && (
-                      <div className="text-sm text-green-600">
-                        {program.discoutPC}% discount available
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    {program.isSuccessfullyEPRegistration ? (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                        Registered
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                        Available
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            !programLoading && (
-              <div className="col-span-full text-center py-12">
-                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Courses Available</h3>
-                <p className="text-gray-500">Please check back later for new course offerings.</p>
-              </div>
-            )
-          )}
-        </div>
-
-        {programs?.length > 0 && (
-          <div className="mt-12 bg-white rounded-lg card-shadow p-8 text-center">
-            <h3 className="text-2xl font-bold text-primary mb-4">Ready to Start Learning Korean?</h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Join our comprehensive Korean language programs and embark on an exciting journey to master one of the world's most fascinating languages.
-            </p>
-            <div className="space-y-2">
+          {programs?.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+              <h3 className="text-xl font-bold text-primary mb-3">Ready to Start Learning Korean?</h3>
+              <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+                Join our comprehensive Korean language programs and embark on an exciting journey to master one of the world's most fascinating languages.
+              </p>
               <p className="text-sm text-gray-500">
                 For registration and payment, please visit your dashboard.
               </p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
