@@ -36,10 +36,19 @@ const DashboardPage: React.FC = () => {
         ValueD: program.id.toString(), // Also a string in C# model
       })
       
-      if (response.success) {
-        setPaymentSuccess(prev => [...prev, program.id])
+      // Check if response has paymentUrl and redirect to payment gateway
+      if (response.paymentUrl) {
+        // Open payment URL in new tab and focus on it
+        const paymentWindow = window.open(response.paymentUrl, '_blank')
+        if (paymentWindow) {
+          paymentWindow.focus()
+        }
+        
         // Optionally refresh programs to get updated registration status
         dispatch(fetchExecutivePrograms())
+      } else {
+        console.error('No payment URL received from API')
+        // Handle error - could show a toast notification
       }
     } catch (error) {
       console.error('Payment failed:', error)
