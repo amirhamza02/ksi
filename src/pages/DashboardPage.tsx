@@ -4,15 +4,18 @@ import { useAuth } from '../contexts/AuthContext'
 import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { fetchExecutivePrograms } from '../store/slices/executiveProgramSlice'
-import { paymentApi } from '../services/paymentApi'
+import { paymentApi, BillingHistoryItem } from '../services/paymentApi'
 import Header from '../components/Header'
-import { User, BookOpen, Clock, Users, Calendar, Star, CreditCard, CheckCircle } from 'lucide-react'
+import { User, BookOpen, Clock, Users, Calendar, Star, CreditCard, CheckCircle, Receipt } from 'lucide-react'
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth()
   const dispatch = useAppDispatch()
   const [paymentLoading, setPaymentLoading] = useState<number | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState<number[]>([])
+  const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([])
+  const [billingLoading, setBillingLoading] = useState(false)
+  const [billingError, setBillingError] = useState<string | null>(null)
   
   const { 
     programs, 
@@ -22,7 +25,22 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchExecutivePrograms())
+    fetchBillingHistory()
   }, [dispatch])
+
+  const fetchBillingHistory = async () => {
+    setBillingLoading(true)
+    setBillingError(null)
+    try {
+      const history = await paymentApi.getBillingHistory()
+      setBillingHistory(history)
+    } catch (error) {
+      setBillingError('Failed to fetch billing history')
+      console.error('Error fetching billing history:', error)
+    } finally {
+      setBillingLoading(false)
+    }
+  }
 
   const handlePayment = async (program) => {
     if (!user?.id) return;
@@ -46,6 +64,8 @@ const DashboardPage: React.FC = () => {
         
         // Optionally refresh programs to get updated registration status
         dispatch(fetchExecutivePrograms())
+        // Refresh billing history after payment
+        fetchBillingHistory()
       } else {
         console.error('No payment URL received from API')
         // Handle error - could show a toast notification
@@ -96,6 +116,11 @@ const DashboardPage: React.FC = () => {
     if (programName.includes('Level 3')) return 'Advanced'
     return 'Unknown'
   }
+
+  // Filter programs to show only registered ones (from billing history)
+  const registeredPrograms = programs?.filter(program => 
+    billingHistory.some(billing => billing.programId === program.id)
+  ) || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-100">
@@ -206,8 +231,102 @@ const DashboardPage: React.FC = () => {
         <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <Receipt className="w-5 h-5 mr-2 text-[#00c0ef]" />
+              My Registered Courses
+            </h2>
+            {(programLoading || billingLoading) && (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00c0ef]"></div>
+            )}
+          </div>
+          
+          {(programError || billingError) && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
+              {programError || billingError}
+            </div>
+          )}
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {registeredPrograms.length > 0 ? (
+              registeredPrograms.map((program) => {
+                const billingInfo = billingHistory.find(billing => billing.programId === program.id)
+                return (
+                  <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between mb-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(program.programsName)}`}>
+                        {getLevel(program.programsName)}
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                        <span className="text-xs text-gray-600">4.8</span>
+                      </div>
+                    </div>
+                    
+                    <h4 className="font-medium text-gray-900 mb-2">{program.programsName}</h4>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center space-x-2 text-xs text-gray-600">
+                        <Clock className="w-3 h-3" />
+                        <span>{program.totalHours} hours total</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs text-gray-600">
+                        <Users className="w-3 h-3" />
+                        <span>{program.classCount} classes</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs text-gray-600">
+                        <Calendar className="w-3 h-3" />
+                        <span>Starts: {program.startDateDescription}</span>
+                      </div>
+                      {billingInfo && (
+                        <div className="flex items-center space-x-2 text-xs text-gray-600">
+                          <Receipt className="w-3 h-3" />
+                          <span>Paid: {new Date(billingInfo.paymentDate).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg font-bold text-gray-900">৳{program.regCost.toLocaleString()}</span>
+                        <span className="text-gray-600 text-sm ml-1">BDT</span>
+                        {program.discoutPC > 0 && (
+                          <div className="text-xs text-green-600">
+                            {program.discoutPC}% discount applied
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Registered</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              !(programLoading || billingLoading) && (
+                <div className="col-span-full text-center py-8">
+                  <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Registered Courses</h3>
+                  <p className="text-gray-500 mb-4">You haven't registered for any courses yet.</p>
+                  <Link
+                    to="/courses"
+                    className="inline-flex items-center text-[#00c0ef] hover:text-cyan-600 font-medium transition-colors"
+                  >
+                    Browse Available Courses →
+                  </Link>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Available Courses Section */}
+        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
               <BookOpen className="w-5 h-5 mr-2 text-[#00c0ef]" />
-              Registered Courses
+              Available Courses
             </h2>
             {programLoading && (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00c0ef]"></div>
@@ -222,7 +341,7 @@ const DashboardPage: React.FC = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {programs && programs?.length > 0 ? (
-              programs.filter(program => program.isRunning).map((program) => (
+              programs.filter(program => program.isRunning && !billingHistory.some(billing => billing.programId === program.id)).map((program) => (
                 <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] hover:shadow-md transition-all duration-200">
                   <div className="flex items-start justify-between mb-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(program.programsName)}`}>
@@ -262,26 +381,14 @@ const DashboardPage: React.FC = () => {
                       )}
                     </div>
                     
-                    {program.isSuccessfullyEPRegistration ? (
-                      <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
-                        <CheckCircle className="w-4 h-4" />
-                        <span>Paid</span>
-                      </div>
-                    ) : paymentSuccess.includes(program.id) ? (
-                      <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
-                        <CheckCircle className="w-4 h-4" />
-                        <span>Paid</span>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handlePayment(program)}
-                        disabled={paymentLoading === program.id}
-                        className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors disabled:opacity-50"
-                      >
-                        <CreditCard className="w-3 h-3" />
-                        <span>{paymentLoading === program.id ? 'Processing...' : 'Pay Now'}</span>
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handlePayment(program)}
+                      disabled={paymentLoading === program.id}
+                      className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      <CreditCard className="w-3 h-3" />
+                      <span>{paymentLoading === program.id ? 'Processing...' : 'Pay Now'}</span>
+                    </button>
                   </div>
                 </div>
               ))

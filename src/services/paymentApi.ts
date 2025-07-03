@@ -16,11 +16,26 @@ export interface PaymentResponse {
   paymentUrl: string;
 }
 
+export interface BillingHistoryItem {
+  id: number;
+  programId: number;
+  programName: string;
+  amount: number;
+  paymentDate: string;
+  status: string;
+  transactionId?: string;
+}
+
 export const paymentApi = {
   payRegistrationBill: async (paymentData: PaymentRequest): Promise<PaymentResponse> => {
     console.log(" call data ", paymentData);
     const response = await api.post<PaymentResponse>('/Payment/pay-reg-bill', JSON.stringify(paymentData));
     return response.data;
+  },
+
+  getBillingHistory: async (): Promise<BillingHistoryItem[]> => {
+    const response = await api.get('/Payment/billing-history');
+    return response.data.data || [];
   },
 
   getPaymentHistory: async (userId: string): Promise<any[]> => {
