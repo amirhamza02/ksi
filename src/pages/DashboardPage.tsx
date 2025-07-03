@@ -24,18 +24,20 @@ const DashboardPage: React.FC = () => {
     dispatch(fetchExecutivePrograms())
   }, [dispatch])
 
-  const handlePayment = async (programId: number) => {
+  const handlePayment = async (program) => {
     if (!user?.id) return;
     
-    setPaymentLoading(programId)
+    setPaymentLoading(program.id)
     try {
       const response = await paymentApi.payRegistrationBill({
-        programId: programId,
-        userId: user.id
+        Amount: program.regCost.toString(),
+        RegId: program.id,
+        ValueB: "28",             // Make sure this matches string type
+        ValueD: program.id.toString(), // Also a string in C# model
       })
       
       if (response.success) {
-        setPaymentSuccess(prev => [...prev, programId])
+        setPaymentSuccess(prev => [...prev, program.id])
         // Optionally refresh programs to get updated registration status
         dispatch(fetchExecutivePrograms())
       }
@@ -263,7 +265,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                     ) : (
                       <button
-                        onClick={() => handlePayment(program.id)}
+                        onClick={() => handlePayment(program)}
                         disabled={paymentLoading === program.id}
                         className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors disabled:opacity-50"
                       >

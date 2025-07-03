@@ -1,8 +1,10 @@
 import api from '../lib/api';
 
 export interface PaymentRequest {
-  programId: number;
-  userId: string;
+  Amount: string;
+  ValueD:number;
+  ValueB:string;
+  RegId: string;
 }
 
 export interface PaymentResponse {
@@ -14,7 +16,8 @@ export interface PaymentResponse {
 
 export const paymentApi = {
   payRegistrationBill: async (paymentData: PaymentRequest): Promise<PaymentResponse> => {
-    const response = await api.post<PaymentResponse>('/Payment/pay-reg-bill', paymentData);
+    console.log(" call data ",paymentData);
+    const response = await api.post<PaymentResponse>('/Payment/pay-reg-bill',JSON.stringify(paymentData));
     return response.data;
   },
 
