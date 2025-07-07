@@ -1,13 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAppDispatch } from '../../hooks/useAppDispatch'
 import { useAppSelector } from '../../hooks/useAppSelector'
 import { fetchExecutivePrograms } from '../../store/slices/executiveProgramSlice'
+import { executiveProgramApi } from '../../services/circularApi'
 import Header from '../../components/Header'
-import { Clock, Users, Calendar, Star, BookOpen } from 'lucide-react'
+import { Clock, Users, Calendar, Star, BookOpen, UserPlus, CheckCircle } from 'lucide-react'
 import { useEffect } from 'react'
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch()
+  const [registrationLoading, setRegistrationLoading] = useState<number | null>(null)
+  const [registrationSuccess, setRegistrationSuccess] = useState<number[]>([])
+  const [registrationError, setRegistrationError] = useState<string | null>(null)
   
   const { 
     programs, 
@@ -18,6 +22,41 @@ const CoursePage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchExecutivePrograms())
   }, [dispatch])
+
+  const handleRegistration = async (program: any) => {
+    setRegistrationLoading(program.id)
+    setRegistrationError(null)
+    
+    try {
+      const registrationData = {
+        regYear: 0,
+        regSem: 0,
+        exProgramRegDetails: [
+          {
+            excutiveProgramId: program.id,
+            credithours: 0,
+            regBill: program.regCost,
+            exeProgramName: program.programsName
+          }
+        ]
+      }
+
+      const response = await executiveProgramApi.registerForProgram(registrationData)
+      
+      if (response.success) {
+        setRegistrationSuccess(prev => [...prev, program.id])
+        // Refresh the programs list to get updated registration status
+        dispatch(fetchExecutivePrograms())
+      } else {
+        setRegistrationError(response.message || 'Registration failed')
+      }
+    } catch (error: any) {
+      console.error('Registration failed:', error)
+      setRegistrationError(error.response?.data?.message || 'Registration failed. Please try again.')
+    } finally {
+      setRegistrationLoading(null)
+    }
+  }
 
   const getLevelColor = (programName: string) => {
     if (programName.includes('Level 1')) {
@@ -48,6 +87,12 @@ const CoursePage: React.FC = () => {
             Explore our comprehensive Korean language programs designed for all skill levels.
           </p>
         </div>
+
+        {registrationError && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+            {registrationError}
+          </div>
+        )}
 
         {programLoading && (
           <div className="flex items-center justify-center py-12">
@@ -94,7 +139,7 @@ const CoursePage: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
                       <span className="text-lg font-bold text-gray-900">৳{program.regCost.toLocaleString()}</span>
                       <span className="text-gray-600 text-sm ml-1">BDT</span>
@@ -117,6 +162,27 @@ const CoursePage: React.FC = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Registration Button */}
+                  <div className="mt-4">
+                    {program.isSuccessfullyEPRegistration || registrationSuccess.includes(program.id) ? (
+                      <div className="flex items-center justify-center space-x-2 text-green-600 text-sm font-medium py-2">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Successfully Registered</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleRegistration(program)}
+                        disabled={registrationLoading === program.id}
+                        className="w-full flex items-center justify-center space-x-2 bg-[#00c0ef] hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        <span>
+                          {registrationLoading === program.id ? 'Registering...' : 'Register Now'}
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))
             ) : (
@@ -137,7 +203,7 @@ const CoursePage: React.FC = () => {
                 Join our comprehensive Korean language programs and embark on an exciting journey to master one of the world's most fascinating languages.
               </p>
               <p className="text-sm text-gray-500">
-                For registration and payment, please visit your dashboard.
+                After registration, you can proceed to payment from your dashboard.
               </p>
             </div>
           )}
