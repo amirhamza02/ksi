@@ -44,8 +44,8 @@ const CoursePage: React.FC = () => {
     
     try {
       const registrationData = {
-        regYear: 0,
-        regSem: 0,
+        regYear: program.regYear,
+        regSem: program.regSem,
         exProgramRegDetails: [
           {
             excutiveProgramId: program.id,
