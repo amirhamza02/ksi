@@ -1,31 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useAppDispatch } from '../hooks/useAppDispatch'
-import { useAppSelector } from '../hooks/useAppSelector'
-import { fetchExecutivePrograms } from '../store/slices/executiveProgramSlice'
 import { paymentApi, BillingHistoryItem } from '../services/paymentApi'
 import Header from '../components/Header'
-import { User, BookOpen, Clock, Users, Calendar, Star, CreditCard, CheckCircle, Receipt, AlertCircle } from 'lucide-react'
+import { User, BookOpen, Clock, CreditCard, CheckCircle, Receipt, AlertCircle, Star } from 'lucide-react'
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth()
-  const dispatch = useAppDispatch()
   const [paymentLoading, setPaymentLoading] = useState<number | null>(null)
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([])
   const [billingLoading, setBillingLoading] = useState(false)
   const [billingError, setBillingError] = useState<string | null>(null)
-  
-  const { 
-    programs, 
-    loading: programLoading, 
-    error: programError 
-  } = useAppSelector((state) => state.executiveProgram)
 
   useEffect(() => {
-    dispatch(fetchExecutivePrograms())
     fetchBillingHistory()
-  }, [dispatch])
+  }, [])
 
   const fetchBillingHistory = async () => {
     setBillingLoading(true)
@@ -111,13 +100,6 @@ const DashboardPage: React.FC = () => {
     if (programName.includes('Level 3')) return 'Advanced'
     return 'Course'
   }
-
-  // Filter programs to show only available ones (not in billing history)
-  const availablePrograms = programs?.filter(program => 
-    program.isRunning && !billingHistory.some(billing => 
-      billing.exProgramRegDetails.some(detail => detail.excutiveProgramId === program.id)
-    )
-  ) || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-100">
@@ -275,6 +257,11 @@ const DashboardPage: React.FC = () => {
                           <span>Discount: ৳{billingItem.regDiscount.toLocaleString()}</span>
                         </div>
                       )}
+                      {billingItem.isIubian && (
+                        <div className="flex items-center space-x-2 text-xs text-blue-600">
+                          <span>IUB Student</span>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -336,97 +323,6 @@ const DashboardPage: React.FC = () => {
               )
             )}
           </div>
-        </div>
-
-        {/* Available Courses Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-              <BookOpen className="w-5 h-5 mr-2 text-[#00c0ef]" />
-              Available Courses
-            </h2>
-            {programLoading && (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00c0ef]"></div>
-            )}
-          </div>
-          
-          {programError && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-              {programError}
-            </div>
-          )}
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availablePrograms.length > 0 ? (
-              availablePrograms.map((program) => (
-                <div key={program.id} className="border border-gray-100 rounded-lg p-4 hover:border-[#00c0ef] hover:shadow-md transition-all duration-200">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(program.programsName)}`}>
-                      {getLevel(program.programsName)}
-                    </span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                      <span className="text-xs text-gray-600">4.8</span>
-                    </div>
-                  </div>
-                  
-                  <h4 className="font-medium text-gray-900 mb-2">{program.programsName}</h4>
-                  
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center space-x-2 text-xs text-gray-600">
-                      <Clock className="w-3 h-3" />
-                      <span>{program.totalHours} hours total</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs text-gray-600">
-                      <Users className="w-3 h-3" />
-                      <span>{program.classCount} classes</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs text-gray-600">
-                      <Calendar className="w-3 h-3" />
-                      <span>Starts: {program.startDateDescription}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-lg font-bold text-gray-900">৳{program.regCost.toLocaleString()}</span>
-                      <span className="text-gray-600 text-sm ml-1">BDT</span>
-                      {program.discoutPC > 0 && (
-                        <div className="text-xs text-green-600">
-                          {program.discoutPC}% discount available
-                        </div>
-                      )}
-                    </div>
-                    
-                    <Link
-                      to="/courses"
-                      className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors"
-                    >
-                      <span>View Details</span>
-                    </Link>
-                  </div>
-                </div>
-              ))
-            ) : (
-              !programLoading && (
-                <div className="col-span-full text-center py-8">
-                  <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No courses available at the moment</p>
-                </div>
-              )
-            )}
-          </div>
-          
-          {availablePrograms.length > 0 && (
-            <div className="mt-6 text-center">
-              <Link
-                to="/courses"
-                className="inline-flex items-center text-[#00c0ef] hover:text-cyan-600 font-medium transition-colors"
-              >
-                View All Available Courses →
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </div>
