@@ -16,14 +16,27 @@ export interface PaymentResponse {
   paymentUrl: string;
 }
 
+export interface ExProgramRegDetail {
+  id: number;
+  excutiveProgramId: number;
+  regBill: number;
+  exeProgramName: string;
+  credithours: number | null;
+}
+
 export interface BillingHistoryItem {
   id: number;
-  programId: number;
-  programName: string;
-  amount: number;
-  paymentDate: string;
-  status: string;
-  transactionId?: string;
+  userId: number;
+  regYear: number;
+  isBillPaid: boolean;
+  isIubian: boolean;
+  isSuccessfullyEPRegistration: boolean;
+  regDiscount: number;
+  regPayable: number;
+  regSem: number;
+  regValue: number;
+  typeId: number;
+  exProgramRegDetails: ExProgramRegDetail[];
 }
 
 export const paymentApi = {
