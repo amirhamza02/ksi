@@ -15,10 +15,6 @@ const HomePage: React.FC = () => {
     error: programError 
   } = useAppSelector((state) => state.executiveProgram)
 
-  useEffect(() => {
-    dispatch(fetchExecutivePrograms())
-  }, [dispatch])
-
   const getLevelColor = (programName: string) => {
     if (programName.includes('Level 1')) {
       return 'bg-green-100 text-green-800'
