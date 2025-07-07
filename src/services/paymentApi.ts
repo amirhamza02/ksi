@@ -24,7 +24,7 @@ export const paymentApi = {
   },
 
   getPaymentHistory: async (userId: string): Promise<any[]> => {
-    const response = await api.get(`/Payment/history/${userId}`);
+    const response = await api.get(`/Payment/billing-history`);
     return response.data.data || [];
   },
 
