@@ -10,7 +10,7 @@ import { Clock, Users, Calendar, Star, BookOpen, UserPlus, CheckCircle, Receipt,
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch()
   const [registrationLoading, setRegistrationLoading] = useState<number | null>(null)
-  const [registrationSuccess, setRegistrationSuccess] = useState<number[]>([])
+  const [registrationSuccess, setRegistrationSuccess] = useState<{[key: number]: string}>({})
   const [registrationError, setRegistrationError] = useState<string | null>(null)
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([])
   const [billingLoading, setBillingLoading] = useState(false)
@@ -59,10 +59,22 @@ const CoursePage: React.FC = () => {
       const response = await executiveProgramApi.registerForProgram(registrationData)
       
       if (response.success) {
-        setRegistrationSuccess(prev => [...prev, program.id])
+        setRegistrationSuccess(prev => ({
+          ...prev,
+          [program.id]: `Successfully registered for ${program.programsName}!`
+        }))
         // Refresh the programs list and billing history
         dispatch(fetchExecutivePrograms())
         fetchBillingHistory()
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setRegistrationSuccess(prev => {
+            const newState = { ...prev }
+            delete newState[program.id]
+            return newState
+          })
+        }, 5000)
       } else {
         setRegistrationError(response.message || 'Registration failed')
       }
@@ -186,6 +198,14 @@ const CoursePage: React.FC = () => {
           </div>
         )}
 
+        {/* Success Messages */}
+        {Object.entries(registrationSuccess).map(([programId, message]) => (
+          <div key={programId} className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+            <CheckCircle className="w-5 h-5 mr-2" />
+            {message}
+          </div>
+        ))}
+
         {registrationError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
             {registrationError}
@@ -271,7 +291,7 @@ const CoursePage: React.FC = () => {
 
                   {/* Registration Button */}
                   <div className="mt-4">
-                    {program.isSuccessfullyEPRegistration || registrationSuccess.includes(program.id) ? (
+                    {program.isSuccessfullyEPRegistration || registrationSuccess[program.id] ? (
                       <div className="flex items-center justify-center space-x-2 text-green-600 text-sm font-medium py-2">
                         <CheckCircle className="w-4 h-4" />
                         <span>Successfully Registered</span>
