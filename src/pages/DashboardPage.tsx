@@ -292,7 +292,7 @@ const DashboardPage: React.FC = () => {
                           <button
                             onClick={() => handlePayment(billingItem)}
                             disabled={paymentLoading === billingItem.id}
-                            className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors disabled:opacity-50 border border-[#00c0ef] hover:border-cyan-600 px-2 py-1 rounded"
+                            className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-xs font-medium transition-colors disabled:opacity-50 border border-[#00c0ef] hover:border-cyan-600 px-2 py-1 rounded"
                           >
                             <CreditCard className="w-3 h-3" />
                             <span>{paymentLoading === billingItem.id ? 'Processing...' : 'Pay Now'}</span>
