@@ -100,12 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { data } = await api.post('/Auth/registration', registrationData);
       
-      // Save both token and user data
-      setAuthToken(data.token);
-      localStorage.setItem('authUser', JSON.stringify(data.user));
-      
-      setUser(data.user);
-      setIsAuthenticated(true);
+      // Don't automatically log in after registration
+      // User needs to login manually to ensure proper token handling
       return true;
     } catch (error) {
       handleError(error);

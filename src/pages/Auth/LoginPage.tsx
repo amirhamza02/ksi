@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Eye, EyeOff } from 'lucide-react'
 
 const LoginPage: React.FC = () => {
+  const location = useLocation()
+  const registrationMessage = location.state?.message
+  const prefilledEmail = location.state?.email || ''
+  
   const [formData, setFormData] = useState({
-    userName: '',
+    userName: prefilledEmail,
     password: ''
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -85,6 +89,12 @@ const LoginPage: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {registrationMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
+                {registrationMessage}
+              </div>
+            )}
+
             {errors.general && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
                 {errors.general}
@@ -98,10 +108,10 @@ const LoginPage: React.FC = () => {
                 name="userName"
                 value={formData.userName}
                 onChange={handleChange}
-                className={`input-field ${errors.email ? 'border-red-500' : ''}`}
+                className={`input-field ${errors.userName ? 'border-red-500' : ''}`}
                 placeholder="Enter your email"
               />
-              {errors.email && <p className="error-text">{errors.email}</p>}
+              {errors.userName && <p className="error-text">{errors.userName}</p>}
             </div>
 
             <div>

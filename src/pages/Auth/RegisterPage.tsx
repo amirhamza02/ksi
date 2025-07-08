@@ -61,7 +61,13 @@ const RegisterPage: React.FC = () => {
     try {
       const success = await register(formData)
       if (success) {
-        navigate('/dashboard')
+        // After successful registration, redirect to login page
+        navigate('/login', { 
+          state: { 
+            message: 'Registration successful! Please login with your credentials.',
+            email: formData.email 
+          } 
+        })
       } else {
         setErrors({ email: 'Email already exists' })
       }
