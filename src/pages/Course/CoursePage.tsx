@@ -5,6 +5,7 @@ import { fetchExecutivePrograms } from '../../store/slices/executiveProgramSlice
 import { executiveProgramApi } from '../../services/circularApi'
 import { paymentApi, BillingHistoryItem } from '../../services/paymentApi'
 import Header from '../../components/Header'
+import { formatRegistrationPeriod } from '../../utils/semesterUtils'
 import { Clock, Users, Calendar, Star, BookOpen, UserPlus, CheckCircle, Receipt, CreditCard } from 'lucide-react'
 
 const CoursePage: React.FC = () => {
@@ -158,6 +159,11 @@ const CoursePage: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">Payment Amount:</span>
                         <span className="font-bold text-[#00c0ef]">৳{billingItem.regPayable.toLocaleString()}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Registration Period:</span>
+                        <span className="text-sm font-medium text-gray-800">{formatRegistrationPeriod(billingItem.regYear, billingItem.regSem)}</span>
                       </div>
                       
                       {billingItem.regDiscount > 0 && (

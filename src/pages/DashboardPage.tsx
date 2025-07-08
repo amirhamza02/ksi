@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { paymentApi, BillingHistoryItem } from '../services/paymentApi'
 import Header from '../components/Header'
+import { formatRegistrationPeriod } from '../utils/semesterUtils'
 import { User, BookOpen, Clock, CreditCard, CheckCircle, Receipt, AlertCircle, Star } from 'lucide-react'
 
 const DashboardPage: React.FC = () => {
@@ -245,6 +246,10 @@ const DashboardPage: React.FC = () => {
                       <div className="flex items-center space-x-2 text-xs text-gray-600">
                         <Receipt className="w-3 h-3" />
                         <span>Registration ID: {billingItem.id}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs text-gray-600">
+                        <Calendar className="w-3 h-3" />
+                        <span>Period: {formatRegistrationPeriod(billingItem.regYear, billingItem.regSem)}</span>
                       </div>
                       {detail.credithours && (
                         <div className="flex items-center space-x-2 text-xs text-gray-600">
