@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { paymentApi, BillingHistoryItem } from '../services/paymentApi'
 import Header from '../components/Header'
 import { formatRegistrationPeriod } from '../utils/semesterUtils'
-import { User, BookOpen, Clock, CreditCard, CheckCircle, Receipt, AlertCircle, Star } from 'lucide-react'
+import { User, BookOpen, Clock, CreditCard, CheckCircle, Receipt, AlertCircle, Star, Calendar } from 'lucide-react'
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth()
