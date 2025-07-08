@@ -349,16 +349,18 @@ const CoursePage: React.FC = () => {
                         <span>Successfully Registered</span>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => handleRegistration(program)}
-                        disabled={registrationLoading === program.id}
-                        className="w-full flex items-center justify-center space-x-2 bg-[#00c0ef] hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        <span>
-                          {registrationLoading === program.id ? 'Registering...' : 'Register Now'}
-                        </span>
-                      </button>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => handleRegistration(program)}
+                          disabled={registrationLoading === program.id}
+                          className="flex items-center space-x-1 text-[#00c0ef] hover:text-cyan-600 text-sm font-medium transition-colors disabled:opacity-50 border border-[#00c0ef] hover:border-cyan-600 px-3 py-1.5 rounded"
+                        >
+                          <UserPlus className="w-3 h-3" />
+                          <span>
+                            {registrationLoading === program.id ? 'Registering...' : 'Register Now'}
+                          </span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
