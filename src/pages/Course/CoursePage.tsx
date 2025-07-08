@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import { useAppDispatch } from '../../hooks/useAppDispatch'
 import { useAppSelector } from '../../hooks/useAppSelector'
 import { fetchExecutivePrograms } from '../../store/slices/executiveProgramSlice'
@@ -11,10 +12,12 @@ import { Clock, Users, Calendar, Star, BookOpen, UserPlus, CheckCircle, Receipt,
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch()
   const [registrationLoading, setRegistrationLoading] = useState<number | null>(null)
+  const [paymentLoading, setPaymentLoading] = useState<number | null>(null)
   const [registrationSuccess, setRegistrationSuccess] = useState<{[key: number]: string}>({})
   const [registrationError, setRegistrationError] = useState<string | null>(null)
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([])
   const [billingLoading, setBillingLoading] = useState(false)
+  const { user } = useAuth()
   
   const { 
     programs, 
@@ -84,6 +87,38 @@ const CoursePage: React.FC = () => {
       setRegistrationError(error.response?.data?.message || 'Registration failed. Please try again.')
     } finally {
       setRegistrationLoading(null)
+    }
+  }
+
+  const handlePayment = async (billingItem: BillingHistoryItem) => {
+    if (!user?.id) return;
+    
+    setPaymentLoading(billingItem.id)
+    try {
+      const response = await paymentApi.payRegistrationBill({
+        Amount: billingItem.regPayable.toString(),
+        RegId: billingItem.id.toString(),
+        ValueB: "28",
+        ValueD: billingItem.id.toString(),
+      })
+      
+      // Check if response has paymentUrl and redirect to payment gateway
+      if (response.paymentUrl) {
+        // Open payment URL in new tab and focus on it
+        const paymentWindow = window.open(response.paymentUrl, '_blank')
+        if (paymentWindow) {
+          paymentWindow.focus()
+        }
+        
+        // Refresh billing history after payment
+        fetchBillingHistory()
+      } else {
+        console.error('No payment URL received from API')
+      }
+    } catch (error) {
+      console.error('Payment failed:', error)
+    } finally {
+      setPaymentLoading(null)
     }
   }
 
@@ -188,12 +223,23 @@ const CoursePage: React.FC = () => {
                           </span>
                         </div>
                       ) : (
-                        <div className="text-center">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                            <CreditCard className="w-3 h-3 mr-1" />
-                            Payment Pending
-                          </span>
-                          <p className="text-xs text-gray-500 mt-1">Visit Dashboard to pay</p>
+                        <div className="space-y-2">
+                          <div className="text-center">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                              <CreditCard className="w-3 h-3 mr-1" />
+                              Payment Pending
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handlePayment(billingItem)}
+                            disabled={paymentLoading === billingItem.id}
+                            className="w-full flex items-center justify-center space-x-2 bg-[#00c0ef] hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            <span>
+                              {paymentLoading === billingItem.id ? 'Processing...' : 'Pay Now'}
+                            </span>
+                          </button>
                         </div>
                       )}
                     </div>
