@@ -7,7 +7,7 @@ import { executiveProgramApi } from '../../services/circularApi'
 import { paymentApi, BillingHistoryItem } from '../../services/paymentApi'
 import Header from '../../components/Header'
 import { formatRegistrationPeriod } from '../../utils/semesterUtils'
-import { Clock, Users, Calendar, Star, BookOpen, UserPlus, CheckCircle, Receipt, CreditCard } from 'lucide-react'
+import { Clock, Users, Calendar, Star, BookOpen, UserPlus, CheckCircle, Receipt, CreditCard, User } from 'lucide-react'
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch()

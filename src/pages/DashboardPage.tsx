@@ -117,6 +117,38 @@ const DashboardPage: React.FC = () => {
           </p>
         </div>
 
+        {/* IUB Student Discount Information */}
+        <div className="mb-8 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-6">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <User className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                Are you an IUB Student? 🎓
+              </h3>
+              <p className="text-blue-800 mb-3">
+                If you are an Independent University Bangladesh (IUB) student, make sure to complete your profile first! 
+                IUB students are eligible for special discounts on Korean language courses.
+              </p>
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/profile"
+                  className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors border border-blue-300 hover:border-blue-400 px-3 py-1.5 rounded"
+                >
+                  <User className="w-4 h-4 mr-1" />
+                  Complete Profile Now
+                </Link>
+                <span className="text-sm text-blue-600 font-medium">
+                  Don't miss your discount opportunity!
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {dashboardStats.map((stat, index) => (
