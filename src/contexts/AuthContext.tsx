@@ -87,7 +87,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setError(null);
       
-      const { data } = await api.post('/registration', userData);
+      // Transform data to match API requirements
+      const registrationData = {
+        email: userData.email,
+        userName: userData.email, // Use email as userName
+        phoneNumber: userData.phone,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        password: userData.password
+        // applicationNo and isSuccessfulRegistration are optional, so we don't include them
+      };
+      
+      const { data } = await api.post('/Auth/registration', registrationData);
       
       // Save both token and user data
       setAuthToken(data.token);
