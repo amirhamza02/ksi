@@ -573,30 +573,25 @@ const ProfilePage: React.FC = () => {
                         onChange={handleOccupationChange}
                         className="input-field"
                         placeholder="Enter institute/company"
-                        className={`input-field ${errors.fatherFirstName ? 'border-red-500' : ''}`}
+                      />
                     </div>
-                        className={`input-field ${errors.motherFirstName ? 'border-red-500' : ''}`}
-                      {errors.fatherFirstName && <p className="error-text">{errors.fatherFirstName}</p>}
+
                     <div>
-                      {errors.motherFirstName && <p className="error-text">{errors.motherFirstName}</p>}
                       <label className="form-label">Department</label>
                       <input
                         type="text"
                         name="department"
                         value={occupationInfo.department}
                         onChange={handleOccupationChange}
-                        className={`input-field ${errors.fatherLastName ? 'border-red-500' : ''}`}
-                        className={`input-field ${errors.motherLastName ? 'border-red-500' : ''}`}
+                        className="input-field"
+                        placeholder="Enter department"
                       />
-                      {errors.fatherLastName && <p className="error-text">{errors.fatherLastName}</p>}
-                      {errors.motherLastName && <p className="error-text">{errors.motherLastName}</p>}
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-                  <label className="form-label">Mother's Name <span className="text-red-500">*</span></label>
             <div className="mt-8 pt-6 border-t border-gray-200">
               <button
                 onClick={handleSave}
