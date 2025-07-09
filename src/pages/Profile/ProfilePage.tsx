@@ -112,34 +112,34 @@ const ProfilePage: React.FC = () => {
   const validateBasicInfo = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!basicInfo.firstName.trim()) {
+    if (!basicInfo.firstName?.trim()) {
       newErrors.firstName = 'First Name is required'
     }
-    if (!basicInfo.lastName.trim()) {
+    if (!basicInfo.lastName?.trim()) {
       newErrors.lastName = 'Last Name is required'
     }
-    if (!basicInfo.dateOfBirth.trim()) {
+    if (!basicInfo.dateOfBirth?.trim()) {
       newErrors.dateOfBirth = 'Date of Birth is required'
     }
-    if (!basicInfo.fatherFirstName.trim()) {
+    if (!basicInfo.fatherFirstName?.trim()) {
       newErrors.fatherFirstName = 'Father\'s first name is required'
     }
-    if (!basicInfo.fatherLastName.trim()) {
+    if (!basicInfo.fatherLastName?.trim()) {
       newErrors.fatherLastName = 'Father\'s last name is required'
     }
-    if (!basicInfo.motherFirstName.trim()) {
+    if (!basicInfo.motherFirstName?.trim()) {
       newErrors.motherFirstName = 'Mother\'s first name is required'
     }
-    if (!basicInfo.motherLastName.trim()) {
+    if (!basicInfo.motherLastName?.trim()) {
       newErrors.motherLastName = 'Mother\'s last name is required'
     }
-    if (!basicInfo.nationality.trim()) {
+    if (!basicInfo.nationality?.trim()) {
       newErrors.nationality = 'Nationality is required'
     }
-    if (!basicInfo.contactNumber.trim()) {
+    if (!basicInfo.contactNumber?.trim()) {
       newErrors.contactNumber = 'Contact Number is required'
     }
-    if (!basicInfo.emergencyContact.trim()) {
+    if (!basicInfo.emergencyContact?.trim()) {
       newErrors.emergencyContact = 'Emergency Contact is required'
     }
 
