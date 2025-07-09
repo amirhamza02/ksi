@@ -1,152 +1,234 @@
-import React, { useState, useEffect } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
-import Header from '../../components/Header'
-import { Save, User, GraduationCap, Plus, Trash2 } from 'lucide-react'
-import api from '../../lib/api'
-
-interface EducationEntry {
-  id: string
-  degreeName: string
-  board: string
-  institution: string
-  academicYear: string
-  result: string
-}
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import Header from "../../components/Header";
+import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
+import api from "../../lib/api";
+import { profileApi } from "../../services/profileApi";
+import { AcademicInfo } from "../../types/profile";
 
 const ProfilePage: React.FC = () => {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('basic')
-  const [isLoading, setIsLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("basic");
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [basicInfo, setBasicInfo] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    isIubian: '',
-    studentId: '',
-    department: '',
-    dateOfBirth: '',
-    nationality: '',
-    contactNumber: user?.phone || '',
-    emergencyContact: '',
-    fatherFirstName: '',
-    fatherLastName: '',
-    motherFirstName: '',
-    motherLastName: '',
-    presentAddress: '',
-    permanentAddress: ''
-  })
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    isIubian: "",
+    studentId: "",
+    department: "",
+    dateOfBirth: "",
+    nationality: "",
+    contactNumber: user?.phone || "",
+    emergencyContact: "",
+    fatherFirstName: "",
+    fatherLastName: "",
+    motherFirstName: "",
+    motherLastName: "",
+    presentAddress: "",
+    permanentAddress: "",
+  });
 
-  const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([
-    { id: '1', degreeName: 'SSC', board: '', institution: '', academicYear: '', result: '' },
-    { id: '2', degreeName: 'HSC', board: '', institution: '', academicYear: '', result: '' },
-    { id: '3', degreeName: 'Honours', board: '', institution: '', academicYear: '', result: '' },
-    { id: '4', degreeName: 'Masters', board: '', institution: '', academicYear: '', result: '' }
-  ])
+  const [educationEntries, setEducationEntries] = useState<AcademicInfo[]>([
+    {
+      id: "1",
+      nameOfDegree: "SSC",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: 2020,
+      result: "",
+    },
+    {
+      id: "2",
+      nameOfDegree: "HSC",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: 2020,
+      result: "",
+    },
+    {
+      id: "3",
+      nameOfDegree: "Honours",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: 2020,
+      result: "",
+    },
+    {
+      id: "4",
+      nameOfDegree: "Masters",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: 2020,
+      result: "",
+    },
+  ]);
 
   const [occupationInfo, setOccupationInfo] = useState({
-    profession: '',
-    institute: '',
-    department: ''
-  })
+    profession: "",
+    institute: "",
+    department: "",
+  });
 
   // Load saved data on component mount
   useEffect(() => {
     if (user?.id) {
-      const savedProfile = localStorage.getItem(`ksi_profile_${user.id}`)
+      const savedProfile = localStorage.getItem(`ksi_profile_${user.id}`);
       if (savedProfile) {
         try {
-          const profileData = JSON.parse(savedProfile)
-          if (profileData.basic) setBasicInfo(profileData.basic)
-          if (profileData.education) setEducationEntries(profileData.education)
-          if (profileData.occupation) setOccupationInfo(profileData.occupation)
+          const profileData = JSON.parse(savedProfile);
+          if (profileData.basic) setBasicInfo(profileData.basic);
+          if (profileData.education) setEducationEntries(profileData.education);
+          if (profileData.occupation) setOccupationInfo(profileData.occupation);
         } catch (error) {
-          console.error('Error loading saved profile:', error)
+          console.error("Error loading saved profile:", error);
         }
       }
     }
-  }, [user?.id])
+  }, [user?.id]);
 
-  const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setBasicInfo(prev => ({ ...prev, [name]: value }))
+  const handleBasicChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setBasicInfo((prev) => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   const handleEducationChange = (id: string, field: string, value: string) => {
-    setEducationEntries(prev => 
-      prev.map(entry => 
+    setEducationEntries((prev) =>
+      prev.map((entry) =>
         entry.id === id ? { ...entry, [field]: value } : entry
       )
-    )
-  }
+    );
+  };
 
   const handleOccupationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setOccupationInfo(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setOccupationInfo((prev) => ({ ...prev, [name]: value }));
+  };
 
   const addEducationEntry = () => {
-    const newEntry: EducationEntry = {
+    const newEntry: AcademicInfo = {
       id: Date.now().toString(),
-      degreeName: '',
-      board: '',
-      institution: '',
-      academicYear: '',
-      result: ''
-    }
-    setEducationEntries(prev => [...prev, newEntry])
-  }
+      nameOfDegree: "",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: 0,
+      result: "",
+    };
+    setEducationEntries((prev) => [...prev, newEntry]);
+  };
 
   const removeEducationEntry = (id: string) => {
     if (educationEntries.length > 1) {
-      setEducationEntries(prev => prev.filter(entry => entry.id !== id))
+      setEducationEntries((prev) => prev.filter((entry) => entry.id !== id));
     }
-  }
+  };
 
   const validateBasicInfo = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!basicInfo.firstName?.trim()) {
-      newErrors.firstName = 'First Name is required'
+      newErrors.firstName = "First Name is required";
     }
     if (!basicInfo.lastName?.trim()) {
-      newErrors.lastName = 'Last Name is required'
+      newErrors.lastName = "Last Name is required";
     }
     if (!basicInfo.dateOfBirth?.trim()) {
-      newErrors.dateOfBirth = 'Date of Birth is required'
+      newErrors.dateOfBirth = "Date of Birth is required";
     }
     if (!basicInfo.fatherFirstName?.trim()) {
-      newErrors.fatherFirstName = 'Father\'s first name is required'
+      newErrors.fatherFirstName = "Father's first name is required";
     }
     if (!basicInfo.fatherLastName?.trim()) {
-      newErrors.fatherLastName = 'Father\'s last name is required'
+      newErrors.fatherLastName = "Father's last name is required";
     }
     if (!basicInfo.motherFirstName?.trim()) {
-      newErrors.motherFirstName = 'Mother\'s first name is required'
+      newErrors.motherFirstName = "Mother's first name is required";
     }
     if (!basicInfo.motherLastName?.trim()) {
-      newErrors.motherLastName = 'Mother\'s last name is required'
+      newErrors.motherLastName = "Mother's last name is required";
     }
     if (!basicInfo.nationality?.trim()) {
-      newErrors.nationality = 'Nationality is required'
+      newErrors.nationality = "Nationality is required";
     }
     if (!basicInfo.contactNumber?.trim()) {
-      newErrors.contactNumber = 'Contact Number is required'
+      newErrors.contactNumber = "Contact Number is required";
     }
     if (!basicInfo.emergencyContact?.trim()) {
-      newErrors.emergencyContact = 'Emergency Contact is required'
+      newErrors.emergencyContact = "Emergency Contact is required";
     }
 
     // Always set errors, even if empty
-    setErrors(prev => ({ ...prev, ...newErrors }))
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateAcademicInfo = () => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
+    // At least one education entry must be filled (any field)
+    const hasAnyEducation = educationEntries.some(
+      (entry) =>
+        entry.nameOfDegree ||
+        entry.boardOfEducation.trim() ||
+        entry.institution.trim() ||
+        (entry.academicYear ?? 0) > 0 ||
+        entry.result.trim()
+    );
+
+    if (!hasAnyEducation) {
+      newErrors.general = "Please provide at least one education entry.";
+      isValid = false;
+    }
+
+    educationEntries.forEach((entry, index) => {
+      // If any of the fields are filled, all must be filled
+      const anyFieldFilled =
+        entry.nameOfDegree ||
+        entry.boardOfEducation.trim() ||
+        entry.institution.trim() ||
+        (entry.academicYear ?? 0) > 0 ||
+        entry.result.trim();
+
+      if (anyFieldFilled) {
+        if (!entry.nameOfDegree) {
+          newErrors[`degreeName_${index}`] = "Degree Name is required";
+          isValid = false;
+        }
+        if (!entry.boardOfEducation.trim()) {
+          newErrors[`board_${index}`] = "Board/University is required";
+          isValid = false;
+        }
+        if (!entry.institution.trim()) {
+          newErrors[`institution_${index}`] = "Institution is required";
+          isValid = false;
+        }
+        if (!entry.academicYear || entry.academicYear <= 2000) {
+          newErrors[`academicYear_${index}`] =
+            "Academic Year must be greater than 2000";
+          isValid = false;
+        }
+        if (!entry.result.trim()) {
+          newErrors[`result_${index}`] = "Result is required";
+          isValid = false;
+        }
+      }
+    });
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return isValid;
+  };
 
   const savePersonalInfo = async () => {
     try {
@@ -154,7 +236,7 @@ const ProfilePage: React.FC = () => {
         firstName: basicInfo.firstName,
         lastName: basicInfo.lastName,
         email: basicInfo.email,
-        isIubian: basicInfo.isIubian === 'yes',
+        isIubian: basicInfo.isIubian === "yes",
         studentId: basicInfo.studentId,
         department: basicInfo.department,
         dateOfBirth: basicInfo.dateOfBirth,
@@ -166,79 +248,133 @@ const ProfilePage: React.FC = () => {
         motherFirstName: basicInfo.motherFirstName,
         motherLastName: basicInfo.motherLastName,
         presentAddress: basicInfo.presentAddress,
-        permanentAddress: basicInfo.permanentAddress
-      }
+        permanentAddress: basicInfo.permanentAddress,
+      };
 
-      const response = await api.post('/Profiles/personal-info', personalInfoData)
-      return response.data
+      const response = await profileApi.submitPersonalInfo(personalInfoData);
+      return response.data;
     } catch (error: any) {
-      console.error('Error saving personal info:', error)
-      throw new Error(error.response?.data?.message || 'Failed to save personal information')
+      console.error("Error saving personal info:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to save personal information"
+      );
     }
-  }
+  };
+
+  const saveEducationEntries = async () => {
+    try {
+      const educationData = educationEntries.map((entry) => ({
+        id: entry.id,
+        userId: typeof user?.id === "number" ? user.id : 0, // Ensure userId is a number
+        nameOfDegree: entry.nameOfDegree,
+        boardOfEducation: entry.boardOfEducation,
+        institution: entry.institution,
+        academicYear: entry.academicYear,
+        result: entry.result,
+      }));
+
+      const response = await profileApi.submitEducationInfo(educationData);
+    } catch (error: any) {
+      console.error("Error saving education entries:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to save education entries"
+      );
+    }
+  };
 
   const handleSave = async () => {
     // Clear previous errors first
-    setErrors({})
-    
-    // Always validate basic info when saving, regardless of active tab
-    if (!validateBasicInfo()) {
-      // If validation fails and we're not on basic tab, switch to it
-      if (activeTab !== 'basic') {
-        setActiveTab('basic')
-      }
-      
-      // Show a general error message
-      setErrors(prev => ({
-        ...prev,
-        general: 'Please fill in all required fields in the Basic Information section before saving.'
-      }))
-      
-      // Scroll to top to show the error message
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }, 100)
-      return
-    }
+    setErrors({});
 
-    setIsLoading(true)
-    
+    setIsLoading(true);
+
     try {
       // Always save personal info since it's required
-      await savePersonalInfo()
-      
+      if (activeTab == "basic") {
+        // Always validate basic info when saving, regardless of active tab
+        if (!validateBasicInfo()) {
+          // If validation fails and we're not on basic tab, switch to it
+          if (activeTab !== "basic") {
+            setActiveTab("basic");
+          }
+
+          // Show a general error message
+          setErrors((prev) => ({
+            ...prev,
+            general:
+              "Please fill in all required fields in the Basic Information section before saving.",
+          }));
+
+          // Scroll to top to show the error message
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }, 100);
+          return;
+        } else {
+          await savePersonalInfo();
+        }
+      } else {
+        // If we're on the education tab, validate basic info first
+        if (!validateAcademicInfo()) {
+          setActiveTab("academic");
+          // Show a general error message
+          setErrors((prev) => ({
+            ...prev,
+            general:
+              "Please fill in all required fields in the academic Information section before saving.",
+          }));
+
+          // Scroll to top to show the error message
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }, 100);
+          return;
+        } else {
+          await saveEducationEntries();
+        }
+      }
+
       // Save to localStorage
       const profileData = {
         basic: basicInfo,
         education: educationEntries,
-        occupation: occupationInfo
-      }
-      localStorage.setItem(`ksi_profile_${user?.id}`, JSON.stringify(profileData))
-      
-      setSuccessMessage('Profile updated successfully!')
-      setTimeout(() => setSuccessMessage(''), 3000)
+        occupation: occupationInfo,
+      };
+      localStorage.setItem(
+        `ksi_profile_${user?.id}`,
+        JSON.stringify(profileData)
+      );
+
+      setSuccessMessage("Profile updated successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      console.error('Error saving profile:', error)
-      setErrors({ general: error instanceof Error ? error.message : 'Failed to save profile' })
+      console.error("Error saving profile:", error);
+      setErrors({
+        general:
+          error instanceof Error ? error.message : "Failed to save profile",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Information', icon: User },
-    { id: 'education', label: 'Education', icon: GraduationCap }
-  ]
+    { id: "basic", label: "Basic Information", icon: User },
+    { id: "education", label: "Education", icon: GraduationCap },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">Complete Your Profile</h1>
+          <h1 className="text-3xl font-bold text-primary">
+            Complete Your Profile
+          </h1>
           <p className="text-gray-600 mt-2">
-            Please fill out all sections to complete your admission process. IUB students are eligible for special discounts!
+            Please fill out all sections to complete your admission process. IUB
+            students are eligible for special discounts!
           </p>
         </div>
 
@@ -258,8 +394,8 @@ const ProfilePage: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
                     activeTab === tab.id
-                      ? 'border-[#00c0ef] text-[#00c0ef]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-[#00c0ef] text-[#00c0ef]"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -271,7 +407,7 @@ const ProfilePage: React.FC = () => {
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'basic' && (
+            {activeTab === "basic" && (
               <div className="space-y-6">
                 {errors.general && (
                   <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
@@ -279,33 +415,47 @@ const ProfilePage: React.FC = () => {
                   </div>
                 )}
 
-                <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
-                
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Basic Information
+                </h3>
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">First Name <span className="text-red-500">*</span></label>
+                    <label className="form-label">
+                      First Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="firstName"
                       value={basicInfo.firstName}
                       onChange={handleBasicChange}
-                      className={`input-field ${errors.firstName ? 'border-red-500' : ''}`}
+                      className={`input-field ${
+                        errors.firstName ? "border-red-500" : ""
+                      }`}
                       placeholder="Enter first name"
                     />
-                    {errors.firstName && <p className="error-text">{errors.firstName}</p>}
+                    {errors.firstName && (
+                      <p className="error-text">{errors.firstName}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="form-label">Last Name <span className="text-red-500">*</span></label>
+                    <label className="form-label">
+                      Last Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="lastName"
                       value={basicInfo.lastName}
                       onChange={handleBasicChange}
-                      className={`input-field ${errors.lastName ? 'border-red-500' : ''}`}
+                      className={`input-field ${
+                        errors.lastName ? "border-red-500" : ""
+                      }`}
                       placeholder="Enter last name"
                     />
-                    {errors.lastName && <p className="error-text">{errors.lastName}</p>}
+                    {errors.lastName && (
+                      <p className="error-text">{errors.lastName}</p>
+                    )}
                   </div>
 
                   <div>
@@ -335,10 +485,15 @@ const ProfilePage: React.FC = () => {
                     </select>
                   </div>
 
-                  {basicInfo.isIubian === 'yes' && (
+                  {basicInfo.isIubian === "yes" && (
                     <>
                       <div>
-                        <label className="form-label">Student ID <span className="text-sm text-gray-500">(Applicable for only IUB student)</span></label>
+                        <label className="form-label">
+                          Student ID{" "}
+                          <span className="text-sm text-gray-500">
+                            (Applicable for only IUB student)
+                          </span>
+                        </label>
                         <input
                           type="text"
                           name="studentId"
@@ -350,7 +505,12 @@ const ProfilePage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="form-label">Department <span className="text-sm text-gray-500">(Applicable for only IUB student)</span></label>
+                        <label className="form-label">
+                          Department{" "}
+                          <span className="text-sm text-gray-500">
+                            (Applicable for only IUB student)
+                          </span>
+                        </label>
                         <input
                           type="text"
                           name="department"
@@ -364,61 +524,87 @@ const ProfilePage: React.FC = () => {
                   )}
 
                   <div>
-                    <label className="form-label">Date of Birth <span className="text-red-500">*</span></label>
+                    <label className="form-label">
+                      Date of Birth <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="date"
                       name="dateOfBirth"
+                      placeholder="DD-MM-YYYY"
                       value={basicInfo.dateOfBirth}
                       onChange={handleBasicChange}
-                      className={`input-field ${errors.dateOfBirth ? 'border-red-500' : ''}`}
+                      className={`input-field ${
+                        errors.dateOfBirth ? "border-red-500" : ""
+                      }`}
                     />
-                    {errors.dateOfBirth && <p className="error-text">{errors.dateOfBirth}</p>}
+                    {errors.dateOfBirth && (
+                      <p className="error-text">{errors.dateOfBirth}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="form-label">Nationality <span className="text-red-500">*</span></label>
+                    <label className="form-label">
+                      Nationality <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="nationality"
                       value={basicInfo.nationality}
                       onChange={handleBasicChange}
-                      className={`input-field ${errors.nationality ? 'border-red-500' : ''}`}
+                      className={`input-field ${
+                        errors.nationality ? "border-red-500" : ""
+                      }`}
                       placeholder="Enter nationality"
                     />
-                    {errors.nationality && <p className="error-text">{errors.nationality}</p>}
+                    {errors.nationality && (
+                      <p className="error-text">{errors.nationality}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="form-label">Contact Number <span className="text-red-500">*</span></label>
+                    <label className="form-label">
+                      Contact Number <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="tel"
                       name="contactNumber"
                       value={basicInfo.contactNumber}
                       onChange={handleBasicChange}
-                      className={`input-field ${errors.contactNumber ? 'border-red-500' : ''}`}
+                      className={`input-field ${
+                        errors.contactNumber ? "border-red-500" : ""
+                      }`}
                       placeholder="Enter contact number"
                     />
-                    {errors.contactNumber && <p className="error-text">{errors.contactNumber}</p>}
+                    {errors.contactNumber && (
+                      <p className="error-text">{errors.contactNumber}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="form-label">Emergency Contact <span className="text-red-500">*</span></label>
+                    <label className="form-label">
+                      Emergency Contact <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="emergencyContact"
                       value={basicInfo.emergencyContact}
                       onChange={handleBasicChange}
-                      className={`input-field ${errors.emergencyContact ? 'border-red-500' : ''}`}
+                      className={`input-field ${
+                        errors.emergencyContact ? "border-red-500" : ""
+                      }`}
                       placeholder="Enter emergency contact"
                     />
-                    {errors.emergencyContact && <p className="error-text">{errors.emergencyContact}</p>}
+                    {errors.emergencyContact && (
+                      <p className="error-text">{errors.emergencyContact}</p>
+                    )}
                   </div>
-
                 </div>
 
                 {/* Father's Name - Same Line */}
                 <div>
-                  <label className="form-label">Father's Name <span className="text-red-500">*</span></label>
+                  <label className="form-label">
+                    Father's Name <span className="text-red-500">*</span>
+                  </label>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <input
@@ -426,10 +612,14 @@ const ProfilePage: React.FC = () => {
                         name="fatherFirstName"
                         value={basicInfo.fatherFirstName}
                         onChange={handleBasicChange}
-                        className={`input-field ${errors.fatherFirstName ? 'border-red-500' : ''}`}
+                        className={`input-field ${
+                          errors.fatherFirstName ? "border-red-500" : ""
+                        }`}
                         placeholder="First name"
                       />
-                      {errors.fatherFirstName && <p className="error-text">{errors.fatherFirstName}</p>}
+                      {errors.fatherFirstName && (
+                        <p className="error-text">{errors.fatherFirstName}</p>
+                      )}
                     </div>
                     <div>
                       <input
@@ -437,17 +627,23 @@ const ProfilePage: React.FC = () => {
                         name="fatherLastName"
                         value={basicInfo.fatherLastName}
                         onChange={handleBasicChange}
-                        className={`input-field ${errors.fatherLastName ? 'border-red-500' : ''}`}
+                        className={`input-field ${
+                          errors.fatherLastName ? "border-red-500" : ""
+                        }`}
                         placeholder="Last name"
                       />
-                      {errors.fatherLastName && <p className="error-text">{errors.fatherLastName}</p>}
+                      {errors.fatherLastName && (
+                        <p className="error-text">{errors.fatherLastName}</p>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Mother's Name - Same Line */}
                 <div>
-                  <label className="form-label">Mother's Name <span className="text-red-500">*</span></label>
+                  <label className="form-label">
+                    Mother's Name <span className="text-red-500">*</span>
+                  </label>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <input
@@ -455,10 +651,14 @@ const ProfilePage: React.FC = () => {
                         name="motherFirstName"
                         value={basicInfo.motherFirstName}
                         onChange={handleBasicChange}
-                        className={`input-field ${errors.motherFirstName ? 'border-red-500' : ''}`}
+                        className={`input-field ${
+                          errors.motherFirstName ? "border-red-500" : ""
+                        }`}
                         placeholder="First name"
                       />
-                      {errors.motherFirstName && <p className="error-text">{errors.motherFirstName}</p>}
+                      {errors.motherFirstName && (
+                        <p className="error-text">{errors.motherFirstName}</p>
+                      )}
                     </div>
                     <div>
                       <input
@@ -466,10 +666,14 @@ const ProfilePage: React.FC = () => {
                         name="motherLastName"
                         value={basicInfo.motherLastName}
                         onChange={handleBasicChange}
-                        className={`input-field ${errors.motherLastName ? 'border-red-500' : ''}`}
+                        className={`input-field ${
+                          errors.motherLastName ? "border-red-500" : ""
+                        }`}
                         placeholder="Last name"
                       />
-                      {errors.motherLastName && <p className="error-text">{errors.motherLastName}</p>}
+                      {errors.motherLastName && (
+                        <p className="error-text">{errors.motherLastName}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -502,18 +706,27 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'education' && (
+            {activeTab === "education" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Education</h3>
-                  <p className="text-sm text-gray-600">Please begin with the latest academic qualification</p>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Education
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Please begin with the latest academic qualification
+                  </p>
                 </div>
 
                 <div className="space-y-6">
                   {educationEntries.map((entry, index) => (
-                    <div key={entry.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div
+                      key={entry.id}
+                      className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                    >
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-medium text-gray-800">Education Entry {index + 1}</h4>
+                        <h4 className="font-medium text-gray-800">
+                          Education Entry {index + 1}
+                        </h4>
                         {educationEntries.length > 1 && (
                           <button
                             onClick={() => removeEducationEntry(entry.id)}
@@ -529,8 +742,14 @@ const ProfilePage: React.FC = () => {
                         <div>
                           <label className="form-label">Name of Degree</label>
                           <select
-                            value={entry.degreeName}
-                            onChange={(e) => handleEducationChange(entry.id, 'degreeName', e.target.value)}
+                            value={entry.nameOfDegree}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "degreeName",
+                                e.target.value
+                              )
+                            }
                             className="input-field"
                           >
                             <option value="">Select degree</option>
@@ -546,8 +765,14 @@ const ProfilePage: React.FC = () => {
                           <label className="form-label">Board</label>
                           <input
                             type="text"
-                            value={entry.board}
-                            onChange={(e) => handleEducationChange(entry.id, 'board', e.target.value)}
+                            value={entry.boardOfEducation}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "board",
+                                e.target.value
+                              )
+                            }
                             className="input-field"
                             placeholder="Enter board/university"
                           />
@@ -558,7 +783,13 @@ const ProfilePage: React.FC = () => {
                           <input
                             type="text"
                             value={entry.institution}
-                            onChange={(e) => handleEducationChange(entry.id, 'institution', e.target.value)}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "institution",
+                                e.target.value
+                              )
+                            }
                             className="input-field"
                             placeholder="Enter institution name"
                           />
@@ -569,7 +800,13 @@ const ProfilePage: React.FC = () => {
                           <input
                             type="text"
                             value={entry.academicYear}
-                            onChange={(e) => handleEducationChange(entry.id, 'academicYear', e.target.value)}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "academicYear",
+                                e.target.value
+                              )
+                            }
                             className="input-field"
                             placeholder="e.g., 2020-2024"
                           />
@@ -580,7 +817,13 @@ const ProfilePage: React.FC = () => {
                           <input
                             type="text"
                             value={entry.result}
-                            onChange={(e) => handleEducationChange(entry.id, 'result', e.target.value)}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "result",
+                                e.target.value
+                              )
+                            }
                             className="input-field"
                             placeholder="Enter CGPA/GPA/Grade"
                           />
@@ -600,8 +843,13 @@ const ProfilePage: React.FC = () => {
 
                 {/* Occupation Section */}
                 <div className="border-t border-gray-200 pt-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Occupation <span className="text-sm font-normal text-gray-500">(Optional)</span></h4>
-                  
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Occupation{" "}
+                    <span className="text-sm font-normal text-gray-500">
+                      (Optional)
+                    </span>
+                  </h4>
+
                   <div className="grid md:grid-cols-3 gap-4">
                     <div>
                       <label className="form-label">Profession</label>
@@ -650,14 +898,14 @@ const ProfilePage: React.FC = () => {
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
-                <span>{isLoading ? 'Saving...' : 'Save Profile'}</span>
+                <span>{isLoading ? "Saving..." : "Save Profile"}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProfilePage
+export default ProfilePage;

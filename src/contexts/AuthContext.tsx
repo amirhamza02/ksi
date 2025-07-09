@@ -26,15 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const userData = JSON.parse(savedUser);
           setUser(userData);
           setIsAuthenticated(true);
-          
-          // Optionally try to refresh user data from server
-          // but don't logout if it fails
-          try {
-            await fetchProfile();
-          } catch (error) {
-            // If profile fetch fails, keep using cached user data
-            console.warn('Failed to refresh profile, using cached data');
-          }
         } catch (error) {
           // If there's an error with cached data, clear it
           logout();
@@ -130,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       
-      const { data } = await api.get('/profile');
+      const { data } = await api.get('/Profiles/profile');
       setUser(data);
       setIsAuthenticated(true);
       

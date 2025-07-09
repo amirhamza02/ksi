@@ -1,0 +1,46 @@
+import { User } from "./auth";
+
+export interface Profile {
+    firstName: string;
+    lastName: string;
+    email: string;
+    isIubian: boolean;
+    studentId: string;
+    department: string;
+    dateOfBirth: string;
+    nationality: string;
+    contactNumber: string;
+    emergencyContact: string;
+    fatherFirstName: string;
+    fatherLastName: string;
+    motherFirstName: string;
+    motherLastName: string;
+    presentAddress: string;
+    permanentAddress: string;
+}
+
+export interface AcademicInfo {
+    id: string;
+    nameOfDegree: string;
+    boardOfEducation: string;
+    institution: string;
+    academicYear?: number;
+    result: string;
+}
+
+export interface ProfessionalInfo {
+    userId: number;
+    profession?: string;
+    institution?: string;
+    department?: string;
+    fromDate?: string; // ISO date string
+    toDate?: string;   // ISO date string
+    isContinue: boolean;
+}
+
+export interface PersonalInfoRequest extends Profile {}
+
+export interface EducationRequest {
+    education: AcademicInfo[];
+}
+
