@@ -143,7 +143,8 @@ const ProfilePage: React.FC = () => {
       newErrors.emergencyContact = 'Emergency Contact is required'
     }
 
-    setErrors(newErrors)
+    // Always set errors, even if empty
+    setErrors(prev => ({ ...prev, ...newErrors }))
     return Object.keys(newErrors).length === 0
   }
 
@@ -177,6 +178,9 @@ const ProfilePage: React.FC = () => {
   }
 
   const handleSave = async () => {
+    // Clear previous errors first
+    setErrors({})
+    
     // Always validate basic info when saving, regardless of active tab
     if (!validateBasicInfo()) {
       // If validation fails and we're not on basic tab, switch to it
@@ -191,12 +195,13 @@ const ProfilePage: React.FC = () => {
       }))
       
       // Scroll to top to show the error message
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
       return
     }
 
     setIsLoading(true)
-    setErrors({})
     
     try {
       // Always save personal info since it's required
@@ -415,24 +420,28 @@ const ProfilePage: React.FC = () => {
                 <div>
                   <label className="form-label">Father's Name <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      name="fatherFirstName"
-                      value={basicInfo.fatherFirstName}
-                      onChange={handleBasicChange}
-                      className={`input-field ${errors.fatherFirstName ? 'border-red-500' : ''}`}
-                      placeholder="First name"
-                    />
-                    {errors.fatherFirstName && <p className="error-text">{errors.fatherFirstName}</p>}
-                    <input
-                      type="text"
-                      name="fatherLastName"
-                      value={basicInfo.fatherLastName}
-                      onChange={handleBasicChange}
-                      className={`input-field ${errors.fatherLastName ? 'border-red-500' : ''}`}
-                      placeholder="Last name"
-                    />
-                    {errors.fatherLastName && <p className="error-text">{errors.fatherLastName}</p>}
+                    <div>
+                      <input
+                        type="text"
+                        name="fatherFirstName"
+                        value={basicInfo.fatherFirstName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${errors.fatherFirstName ? 'border-red-500' : ''}`}
+                        placeholder="First name"
+                      />
+                      {errors.fatherFirstName && <p className="error-text">{errors.fatherFirstName}</p>}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        name="fatherLastName"
+                        value={basicInfo.fatherLastName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${errors.fatherLastName ? 'border-red-500' : ''}`}
+                        placeholder="Last name"
+                      />
+                      {errors.fatherLastName && <p className="error-text">{errors.fatherLastName}</p>}
+                    </div>
                   </div>
                 </div>
 
@@ -440,24 +449,28 @@ const ProfilePage: React.FC = () => {
                 <div>
                   <label className="form-label">Mother's Name <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      name="motherFirstName"
-                      value={basicInfo.motherFirstName}
-                      onChange={handleBasicChange}
-                      className={`input-field ${errors.motherFirstName ? 'border-red-500' : ''}`}
-                      placeholder="First name"
-                    />
-                    {errors.motherFirstName && <p className="error-text">{errors.motherFirstName}</p>}
-                    <input
-                      type="text"
-                      name="motherLastName"
-                      value={basicInfo.motherLastName}
-                      onChange={handleBasicChange}
-                      className={`input-field ${errors.motherLastName ? 'border-red-500' : ''}`}
-                      placeholder="Last name"
-                    />
-                    {errors.motherLastName && <p className="error-text">{errors.motherLastName}</p>}
+                    <div>
+                      <input
+                        type="text"
+                        name="motherFirstName"
+                        value={basicInfo.motherFirstName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${errors.motherFirstName ? 'border-red-500' : ''}`}
+                        placeholder="First name"
+                      />
+                      {errors.motherFirstName && <p className="error-text">{errors.motherFirstName}</p>}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        name="motherLastName"
+                        value={basicInfo.motherLastName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${errors.motherLastName ? 'border-red-500' : ''}`}
+                        placeholder="Last name"
+                      />
+                      {errors.motherLastName && <p className="error-text">{errors.motherLastName}</p>}
+                    </div>
                   </div>
                 </div>
 
