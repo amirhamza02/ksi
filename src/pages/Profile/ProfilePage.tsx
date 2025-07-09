@@ -21,7 +21,8 @@ const ProfilePage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [basicInfo, setBasicInfo] = useState({
-    fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
     email: user?.email || '',
     isIubian: '',
     studentId: '',
@@ -111,6 +112,12 @@ const ProfilePage: React.FC = () => {
   const validateBasicInfo = () => {
     const newErrors: Record<string, string> = {}
 
+    if (!basicInfo.firstName.trim()) {
+      newErrors.firstName = 'First Name is required'
+    }
+    if (!basicInfo.lastName.trim()) {
+      newErrors.lastName = 'Last Name is required'
+    }
     if (!basicInfo.dateOfBirth.trim()) {
       newErrors.dateOfBirth = 'Date of Birth is required'
     }
@@ -143,7 +150,8 @@ const ProfilePage: React.FC = () => {
   const savePersonalInfo = async () => {
     try {
       const personalInfoData = {
-        fullName: basicInfo.fullName,
+        firstName: basicInfo.firstName,
+        lastName: basicInfo.lastName,
         email: basicInfo.email,
         isIubian: basicInfo.isIubian === 'yes',
         studentId: basicInfo.studentId,
@@ -258,15 +266,29 @@ const ProfilePage: React.FC = () => {
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">Full Name</label>
+                    <label className="form-label">First Name <span className="text-red-500">*</span></label>
                     <input
                       type="text"
-                      name="fullName"
-                      value={basicInfo.fullName}
+                      name="firstName"
+                      value={basicInfo.firstName}
                       onChange={handleBasicChange}
-                      className="input-field"
-                      placeholder="Enter full name"
+                      className={`input-field ${errors.firstName ? 'border-red-500' : ''}`}
+                      placeholder="Enter first name"
                     />
+                    {errors.firstName && <p className="error-text">{errors.firstName}</p>}
+                  </div>
+
+                  <div>
+                    <label className="form-label">Last Name <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={basicInfo.lastName}
+                      onChange={handleBasicChange}
+                      className={`input-field ${errors.lastName ? 'border-red-500' : ''}`}
+                      placeholder="Enter last name"
+                    />
+                    {errors.lastName && <p className="error-text">{errors.lastName}</p>}
                   </div>
 
                   <div>
@@ -386,40 +408,44 @@ const ProfilePage: React.FC = () => {
                       name="fatherFirstName"
                       value={basicInfo.fatherFirstName}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.fatherFirstName ? 'border-red-500' : ''}`}
                       placeholder="First name"
                     />
+                    {errors.fatherFirstName && <p className="error-text">{errors.fatherFirstName}</p>}
                     <input
                       type="text"
                       name="fatherLastName"
                       value={basicInfo.fatherLastName}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.fatherLastName ? 'border-red-500' : ''}`}
                       placeholder="Last name"
                     />
+                    {errors.fatherLastName && <p className="error-text">{errors.fatherLastName}</p>}
                   </div>
                 </div>
 
                 {/* Mother's Name - Same Line */}
                 <div>
-                  <label className="form-label">Mother's Name</label>
+                  <label className="form-label">Mother's Name <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
                       name="motherFirstName"
                       value={basicInfo.motherFirstName}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.motherFirstName ? 'border-red-500' : ''}`}
                       placeholder="First name"
                     />
+                    {errors.motherFirstName && <p className="error-text">{errors.motherFirstName}</p>}
                     <input
                       type="text"
                       name="motherLastName"
                       value={basicInfo.motherLastName}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.motherLastName ? 'border-red-500' : ''}`}
                       placeholder="Last name"
                     />
+                    {errors.motherLastName && <p className="error-text">{errors.motherLastName}</p>}
                   </div>
                 </div>
 
