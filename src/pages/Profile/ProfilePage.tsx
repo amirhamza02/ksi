@@ -177,8 +177,21 @@ const ProfilePage: React.FC = () => {
   }
 
   const handleSave = async () => {
-    // Validate basic info if we're on the basic tab
-    if (activeTab === 'basic' && !validateBasicInfo()) {
+    // Always validate basic info when saving, regardless of active tab
+    if (!validateBasicInfo()) {
+      // If validation fails and we're not on basic tab, switch to it
+      if (activeTab !== 'basic') {
+        setActiveTab('basic')
+      }
+      
+      // Show a general error message
+      setErrors(prev => ({
+        ...prev,
+        general: 'Please fill in all required fields in the Basic Information section before saving.'
+      }))
+      
+      // Scroll to top to show the error message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
 
@@ -186,9 +199,8 @@ const ProfilePage: React.FC = () => {
     setErrors({})
     
     try {
-      if (activeTab === 'basic') {
-        await savePersonalInfo()
-      }
+      // Always save personal info since it's required
+      await savePersonalInfo()
       
       // Save to localStorage
       const profileData = {
