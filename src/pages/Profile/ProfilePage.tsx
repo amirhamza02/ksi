@@ -290,51 +290,50 @@ const ProfilePage: React.FC = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="form-label">Father's First Name</label>
+                </div>
+
+                {/* Father's Name - Same Line */}
+                <div>
+                  <label className="form-label">Father's Name</label>
+                  <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
                       name="fatherFirstName"
                       value={basicInfo.fatherFirstName}
                       onChange={handleBasicChange}
                       className="input-field"
-                      placeholder="Enter father's first name"
+                      placeholder="First name"
                     />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Father's Last Name</label>
                     <input
                       type="text"
                       name="fatherLastName"
                       value={basicInfo.fatherLastName}
                       onChange={handleBasicChange}
                       className="input-field"
-                      placeholder="Enter father's last name"
+                      placeholder="Last name"
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label className="form-label">Mother's First Name</label>
+                {/* Mother's Name - Same Line */}
+                <div>
+                  <label className="form-label">Mother's Name</label>
+                  <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
                       name="motherFirstName"
                       value={basicInfo.motherFirstName}
                       onChange={handleBasicChange}
                       className="input-field"
-                      placeholder="Enter mother's first name"
+                      placeholder="First name"
                     />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Mother's Last Name</label>
                     <input
                       type="text"
                       name="motherLastName"
                       value={basicInfo.motherLastName}
                       onChange={handleBasicChange}
                       className="input-field"
-                      placeholder="Enter mother's last name"
+                      placeholder="Last name"
                     />
                   </div>
                 </div>
