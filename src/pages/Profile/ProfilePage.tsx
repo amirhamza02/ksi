@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/Header'
 import { Save, User, GraduationCap, Plus, Trash2 } from 'lucide-react'
+import api from '../../lib/api'
 
 interface EducationEntry {
   id: string
@@ -17,6 +18,7 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('basic')
   const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [basicInfo, setBasicInfo] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
@@ -69,6 +71,10 @@ const ProfilePage: React.FC = () => {
   const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setBasicInfo(prev => ({ ...prev, [name]: value }))
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }))
+    }
   }
 
   const handleEducationChange = (id: string, field: string, value: string) => {
@@ -102,11 +108,79 @@ const ProfilePage: React.FC = () => {
     }
   }
 
-  const handleSave = async () => {
-    setIsLoading(true)
+  const validateBasicInfo = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!basicInfo.dateOfBirth.trim()) {
+      newErrors.dateOfBirth = 'Date of Birth is required'
+    }
+    if (!basicInfo.fatherFirstName.trim()) {
+      newErrors.fatherFirstName = 'Father\'s first name is required'
+    }
+    if (!basicInfo.fatherLastName.trim()) {
+      newErrors.fatherLastName = 'Father\'s last name is required'
+    }
+    if (!basicInfo.motherFirstName.trim()) {
+      newErrors.motherFirstName = 'Mother\'s first name is required'
+    }
+    if (!basicInfo.motherLastName.trim()) {
+      newErrors.motherLastName = 'Mother\'s last name is required'
+    }
+    if (!basicInfo.nationality.trim()) {
+      newErrors.nationality = 'Nationality is required'
+    }
+    if (!basicInfo.contactNumber.trim()) {
+      newErrors.contactNumber = 'Contact Number is required'
+    }
+    if (!basicInfo.emergencyContact.trim()) {
+      newErrors.emergencyContact = 'Emergency Contact is required'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const savePersonalInfo = async () => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const personalInfoData = {
+        fullName: basicInfo.fullName,
+        email: basicInfo.email,
+        isIubian: basicInfo.isIubian === 'yes',
+        studentId: basicInfo.studentId,
+        department: basicInfo.department,
+        dateOfBirth: basicInfo.dateOfBirth,
+        nationality: basicInfo.nationality,
+        contactNumber: basicInfo.contactNumber,
+        emergencyContact: basicInfo.emergencyContact,
+        fatherFirstName: basicInfo.fatherFirstName,
+        fatherLastName: basicInfo.fatherLastName,
+        motherFirstName: basicInfo.motherFirstName,
+        motherLastName: basicInfo.motherLastName,
+        presentAddress: basicInfo.presentAddress,
+        permanentAddress: basicInfo.permanentAddress
+      }
+
+      const response = await api.post('/Profiles/personal-info', personalInfoData)
+      return response.data
+    } catch (error: any) {
+      console.error('Error saving personal info:', error)
+      throw new Error(error.response?.data?.message || 'Failed to save personal information')
+    }
+  }
+
+  const handleSave = async () => {
+    // Validate basic info if we're on the basic tab
+    if (activeTab === 'basic' && !validateBasicInfo()) {
+      return
+    }
+
+    setIsLoading(true)
+    setErrors({})
+    
+    try {
+      if (activeTab === 'basic') {
+        await savePersonalInfo()
+      }
       
       // Save to localStorage
       const profileData = {
@@ -120,6 +194,7 @@ const ProfilePage: React.FC = () => {
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       console.error('Error saving profile:', error)
+      setErrors({ general: error instanceof Error ? error.message : 'Failed to save profile' })
     } finally {
       setIsLoading(false)
     }
@@ -173,6 +248,12 @@ const ProfilePage: React.FC = () => {
           <div className="p-6">
             {activeTab === 'basic' && (
               <div className="space-y-6">
+                {errors.general && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                    {errors.general}
+                  </div>
+                )}
+
                 <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
                 
                 <div className="grid md:grid-cols-2 gap-4">
@@ -244,57 +325,61 @@ const ProfilePage: React.FC = () => {
                   )}
 
                   <div>
-                    <label className="form-label">Date of Birth</label>
+                    <label className="form-label">Date of Birth <span className="text-red-500">*</span></label>
                     <input
                       type="date"
                       name="dateOfBirth"
                       value={basicInfo.dateOfBirth}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.dateOfBirth ? 'border-red-500' : ''}`}
                     />
+                    {errors.dateOfBirth && <p className="error-text">{errors.dateOfBirth}</p>}
                   </div>
 
                   <div>
-                    <label className="form-label">Nationality</label>
+                    <label className="form-label">Nationality <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       name="nationality"
                       value={basicInfo.nationality}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.nationality ? 'border-red-500' : ''}`}
                       placeholder="Enter nationality"
                     />
+                    {errors.nationality && <p className="error-text">{errors.nationality}</p>}
                   </div>
 
                   <div>
-                    <label className="form-label">Contact Number</label>
+                    <label className="form-label">Contact Number <span className="text-red-500">*</span></label>
                     <input
                       type="tel"
                       name="contactNumber"
                       value={basicInfo.contactNumber}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.contactNumber ? 'border-red-500' : ''}`}
                       placeholder="Enter contact number"
                     />
+                    {errors.contactNumber && <p className="error-text">{errors.contactNumber}</p>}
                   </div>
 
                   <div>
-                    <label className="form-label">Emergency Contact</label>
+                    <label className="form-label">Emergency Contact <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       name="emergencyContact"
                       value={basicInfo.emergencyContact}
                       onChange={handleBasicChange}
-                      className="input-field"
+                      className={`input-field ${errors.emergencyContact ? 'border-red-500' : ''}`}
                       placeholder="Enter emergency contact"
                     />
+                    {errors.emergencyContact && <p className="error-text">{errors.emergencyContact}</p>}
                   </div>
 
                 </div>
 
                 {/* Father's Name - Same Line */}
                 <div>
-                  <label className="form-label">Father's Name</label>
+                  <label className="form-label">Father's Name <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -488,26 +573,30 @@ const ProfilePage: React.FC = () => {
                         onChange={handleOccupationChange}
                         className="input-field"
                         placeholder="Enter institute/company"
-                      />
+                        className={`input-field ${errors.fatherFirstName ? 'border-red-500' : ''}`}
                     </div>
-
+                        className={`input-field ${errors.motherFirstName ? 'border-red-500' : ''}`}
+                      {errors.fatherFirstName && <p className="error-text">{errors.fatherFirstName}</p>}
                     <div>
+                      {errors.motherFirstName && <p className="error-text">{errors.motherFirstName}</p>}
                       <label className="form-label">Department</label>
                       <input
                         type="text"
                         name="department"
                         value={occupationInfo.department}
                         onChange={handleOccupationChange}
-                        className="input-field"
-                        placeholder="Enter department"
+                        className={`input-field ${errors.fatherLastName ? 'border-red-500' : ''}`}
+                        className={`input-field ${errors.motherLastName ? 'border-red-500' : ''}`}
                       />
+                      {errors.fatherLastName && <p className="error-text">{errors.fatherLastName}</p>}
+                      {errors.motherLastName && <p className="error-text">{errors.motherLastName}</p>}
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Save Button */}
+                  <label className="form-label">Mother's Name <span className="text-red-500">*</span></label>
             <div className="mt-8 pt-6 border-t border-gray-200">
               <button
                 onClick={handleSave}
