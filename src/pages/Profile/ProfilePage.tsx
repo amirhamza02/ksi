@@ -1,60 +1,105 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/Header'
-import { Save, User, GraduationCap, MapPin } from 'lucide-react'
+import { Save, User, GraduationCap, Plus, Trash2 } from 'lucide-react'
+
+interface EducationEntry {
+  id: string
+  degreeName: string
+  board: string
+  institution: string
+  academicYear: string
+  result: string
+}
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('personal')
+  const [activeTab, setActiveTab] = useState('basic')
   const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
 
-  const [personalInfo, setPersonalInfo] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+  const [basicInfo, setBasicInfo] = useState({
+    fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     email: user?.email || '',
-    phone: user?.phone || '',
+    isIubian: '',
+    studentId: '',
+    department: '',
     dateOfBirth: '',
-    gender: '',
     nationality: '',
-    fatherName: '',
-    motherName: '',
+    contactNumber: user?.phone || '',
     emergencyContact: '',
-    emergencyPhone: ''
-  })
-
-  const [addressInfo, setAddressInfo] = useState({
+    fatherFirstName: '',
+    fatherLastName: '',
+    motherFirstName: '',
+    motherLastName: '',
     presentAddress: '',
-    permanentAddress: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'Bangladesh'
+    permanentAddress: ''
   })
 
-  const [educationInfo, setEducationInfo] = useState({
-    highestDegree: '',
-    institution: '',
-    graduationYear: '',
-    cgpa: '',
-    previousKoreanStudy: '',
-    koreanLevel: '',
-    studyPurpose: ''
+  const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([
+    { id: '1', degreeName: 'SSC', board: '', institution: '', academicYear: '', result: '' },
+    { id: '2', degreeName: 'HSC', board: '', institution: '', academicYear: '', result: '' },
+    { id: '3', degreeName: 'Honours', board: '', institution: '', academicYear: '', result: '' },
+    { id: '4', degreeName: 'Masters', board: '', institution: '', academicYear: '', result: '' }
+  ])
+
+  const [occupationInfo, setOccupationInfo] = useState({
+    profession: '',
+    institute: '',
+    department: ''
   })
 
-  const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Load saved data on component mount
+  useEffect(() => {
+    if (user?.id) {
+      const savedProfile = localStorage.getItem(`ksi_profile_${user.id}`)
+      if (savedProfile) {
+        try {
+          const profileData = JSON.parse(savedProfile)
+          if (profileData.basic) setBasicInfo(profileData.basic)
+          if (profileData.education) setEducationEntries(profileData.education)
+          if (profileData.occupation) setOccupationInfo(profileData.occupation)
+        } catch (error) {
+          console.error('Error loading saved profile:', error)
+        }
+      }
+    }
+  }, [user?.id])
+
+  const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setPersonalInfo(prev => ({ ...prev, [name]: value }))
+    setBasicInfo(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setAddressInfo(prev => ({ ...prev, [name]: value }))
+  const handleEducationChange = (id: string, field: string, value: string) => {
+    setEducationEntries(prev => 
+      prev.map(entry => 
+        entry.id === id ? { ...entry, [field]: value } : entry
+      )
+    )
   }
 
-  const handleEducationChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleOccupationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setEducationInfo(prev => ({ ...prev, [name]: value }))
+    setOccupationInfo(prev => ({ ...prev, [name]: value }))
+  }
+
+  const addEducationEntry = () => {
+    const newEntry: EducationEntry = {
+      id: Date.now().toString(),
+      degreeName: '',
+      board: '',
+      institution: '',
+      academicYear: '',
+      result: ''
+    }
+    setEducationEntries(prev => [...prev, newEntry])
+  }
+
+  const removeEducationEntry = (id: string) => {
+    if (educationEntries.length > 1) {
+      setEducationEntries(prev => prev.filter(entry => entry.id !== id))
+    }
   }
 
   const handleSave = async () => {
@@ -65,9 +110,9 @@ const ProfilePage: React.FC = () => {
       
       // Save to localStorage
       const profileData = {
-        personal: personalInfo,
-        address: addressInfo,
-        education: educationInfo
+        basic: basicInfo,
+        education: educationEntries,
+        occupation: occupationInfo
       }
       localStorage.setItem(`ksi_profile_${user?.id}`, JSON.stringify(profileData))
       
@@ -81,9 +126,8 @@ const ProfilePage: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'personal', label: 'Personal Info', icon: User },
-    { id: 'address', label: 'Address Info', icon: MapPin },
-    { id: 'education', label: 'Education Info', icon: GraduationCap }
+    { id: 'basic', label: 'Basic Information', icon: User },
+    { id: 'education', label: 'Education', icon: GraduationCap }
   ]
 
   return (
@@ -94,7 +138,7 @@ const ProfilePage: React.FC = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary">Complete Your Profile</h1>
           <p className="text-gray-600 mt-2">
-            Please fill out all sections to complete your admission process.
+            Please fill out all sections to complete your admission process. IUB students are eligible for special discounts!
           </p>
         </div>
 
@@ -127,32 +171,20 @@ const ProfilePage: React.FC = () => {
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'personal' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+            {activeTab === 'basic' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">First Name</label>
+                    <label className="form-label">Full Name</label>
                     <input
                       type="text"
-                      name="firstName"
-                      value={personalInfo.firstName}
-                      onChange={handlePersonalChange}
+                      name="fullName"
+                      value={basicInfo.fullName}
+                      onChange={handleBasicChange}
                       className="input-field"
-                      placeholder="Enter first name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Last Name</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={personalInfo.lastName}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter last name"
+                      placeholder="Enter full name"
                     />
                   </div>
 
@@ -161,8 +193,8 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="email"
                       name="email"
-                      value={personalInfo.email}
-                      onChange={handlePersonalChange}
+                      value={basicInfo.email}
+                      onChange={handleBasicChange}
                       className="input-field"
                       placeholder="Enter email"
                       disabled
@@ -170,257 +202,11 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="form-label">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={personalInfo.phone}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Date of Birth</label>
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      value={personalInfo.dateOfBirth}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Gender</label>
+                    <label className="form-label">Are you an IUBian?</label>
                     <select
-                      name="gender"
-                      value={personalInfo.gender}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                    >
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="form-label">Nationality</label>
-                    <input
-                      type="text"
-                      name="nationality"
-                      value={personalInfo.nationality}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter nationality"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Father's Name</label>
-                    <input
-                      type="text"
-                      name="fatherName"
-                      value={personalInfo.fatherName}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter father's name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Mother's Name</label>
-                    <input
-                      type="text"
-                      name="motherName"
-                      value={personalInfo.motherName}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter mother's name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Emergency Contact Name</label>
-                    <input
-                      type="text"
-                      name="emergencyContact"
-                      value={personalInfo.emergencyContact}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter emergency contact name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Emergency Contact Phone</label>
-                    <input
-                      type="tel"
-                      name="emergencyPhone"
-                      value={personalInfo.emergencyPhone}
-                      onChange={handlePersonalChange}
-                      className="input-field"
-                      placeholder="Enter emergency contact phone"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'address' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Address Information</h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="form-label">Present Address</label>
-                    <input
-                      type="text"
-                      name="presentAddress"
-                      value={addressInfo.presentAddress}
-                      onChange={handleAddressChange}
-                      className="input-field"
-                      placeholder="Enter present address"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Permanent Address</label>
-                    <input
-                      type="text"
-                      name="permanentAddress"
-                      value={addressInfo.permanentAddress}
-                      onChange={handleAddressChange}
-                      className="input-field"
-                      placeholder="Enter permanent address"
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="form-label">City</label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={addressInfo.city}
-                        onChange={handleAddressChange}
-                        className="input-field"
-                        placeholder="Enter city"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="form-label">State/Division</label>
-                      <input
-                        type="text"
-                        name="state"
-                        value={addressInfo.state}
-                        onChange={handleAddressChange}
-                        className="input-field"
-                        placeholder="Enter state/division"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="form-label">Postal Code</label>
-                      <input
-                        type="text"
-                        name="postalCode"
-                        value={addressInfo.postalCode}
-                        onChange={handleAddressChange}
-                        className="input-field"
-                        placeholder="Enter postal code"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="form-label">Country</label>
-                      <select
-                        name="country"
-                        value={addressInfo.country}
-                        onChange={handleAddressChange}
-                        className="input-field"
-                      >
-                        <option value="Bangladesh">Bangladesh</option>
-                        <option value="India">India</option>
-                        <option value="Pakistan">Pakistan</option>
-                        <option value="Nepal">Nepal</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'education' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Educational Information</h3>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="form-label">Highest Degree</label>
-                    <select
-                      name="highestDegree"
-                      value={educationInfo.highestDegree}
-                      onChange={handleEducationChange}
-                      className="input-field"
-                    >
-                      <option value="">Select degree</option>
-                      <option value="high-school">High School</option>
-                      <option value="bachelor">Bachelor's Degree</option>
-                      <option value="master">Master's Degree</option>
-                      <option value="phd">PhD</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="form-label">Institution</label>
-                    <input
-                      type="text"
-                      name="institution"
-                      value={educationInfo.institution}
-                      onChange={handleEducationChange}
-                      className="input-field"
-                      placeholder="Enter institution name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Graduation Year</label>
-                    <input
-                      type="number"
-                      name="graduationYear"
-                      value={educationInfo.graduationYear}
-                      onChange={handleEducationChange}
-                      className="input-field"
-                      placeholder="Enter graduation year"
-                      min="1990"
-                      max="2030"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">CGPA/GPA</label>
-                    <input
-                      type="text"
-                      name="cgpa"
-                      value={educationInfo.cgpa}
-                      onChange={handleEducationChange}
-                      className="input-field"
-                      placeholder="Enter CGPA/GPA"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Previous Korean Study</label>
-                    <select
-                      name="previousKoreanStudy"
-                      value={educationInfo.previousKoreanStudy}
-                      onChange={handleEducationChange}
+                      name="isIubian"
+                      value={basicInfo.isIubian}
+                      onChange={handleBasicChange}
                       className="input-field"
                     >
                       <option value="">Select option</option>
@@ -429,39 +215,301 @@ const ProfilePage: React.FC = () => {
                     </select>
                   </div>
 
+                  {basicInfo.isIubian === 'yes' && (
+                    <>
+                      <div>
+                        <label className="form-label">Student ID <span className="text-sm text-gray-500">(Applicable for only IUB student)</span></label>
+                        <input
+                          type="text"
+                          name="studentId"
+                          value={basicInfo.studentId}
+                          onChange={handleBasicChange}
+                          className="input-field"
+                          placeholder="Enter student ID"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="form-label">Department <span className="text-sm text-gray-500">(Applicable for only IUB student)</span></label>
+                        <input
+                          type="text"
+                          name="department"
+                          value={basicInfo.department}
+                          onChange={handleBasicChange}
+                          className="input-field"
+                          placeholder="Enter department"
+                        />
+                      </div>
+                    </>
+                  )}
+
                   <div>
-                    <label className="form-label">Korean Level (if applicable)</label>
-                    <select
-                      name="koreanLevel"
-                      value={educationInfo.koreanLevel}
-                      onChange={handleEducationChange}
+                    <label className="form-label">Date of Birth</label>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={basicInfo.dateOfBirth}
+                      onChange={handleBasicChange}
                       className="input-field"
-                    >
-                      <option value="">Select level</option>
-                      <option value="beginner">Beginner</option>
-                      <option value="elementary">Elementary</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
-                    </select>
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Nationality</label>
+                    <input
+                      type="text"
+                      name="nationality"
+                      value={basicInfo.nationality}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter nationality"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Contact Number</label>
+                    <input
+                      type="tel"
+                      name="contactNumber"
+                      value={basicInfo.contactNumber}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter contact number"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Emergency Contact</label>
+                    <input
+                      type="text"
+                      name="emergencyContact"
+                      value={basicInfo.emergencyContact}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter emergency contact"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Father's First Name</label>
+                    <input
+                      type="text"
+                      name="fatherFirstName"
+                      value={basicInfo.fatherFirstName}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter father's first name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Father's Last Name</label>
+                    <input
+                      type="text"
+                      name="fatherLastName"
+                      value={basicInfo.fatherLastName}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter father's last name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Mother's First Name</label>
+                    <input
+                      type="text"
+                      name="motherFirstName"
+                      value={basicInfo.motherFirstName}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter mother's first name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Mother's Last Name</label>
+                    <input
+                      type="text"
+                      name="motherLastName"
+                      value={basicInfo.motherLastName}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter mother's last name"
+                    />
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label">Purpose of Study</label>
-                  <textarea
-                    name="studyPurpose"
-                    value={educationInfo.studyPurpose}
-                    onChange={handleEducationChange}
-                    className="input-field"
-                    rows={4}
-                    placeholder="Explain why you want to learn Korean and your goals..."
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="form-label">Present Address</label>
+                    <textarea
+                      name="presentAddress"
+                      value={basicInfo.presentAddress}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      rows={3}
+                      placeholder="Enter present address"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Permanent Address</label>
+                    <textarea
+                      name="permanentAddress"
+                      value={basicInfo.permanentAddress}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      rows={3}
+                      placeholder="Enter permanent address"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'education' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Education</h3>
+                  <p className="text-sm text-gray-600">Please begin with the latest academic qualification</p>
+                </div>
+
+                <div className="space-y-6">
+                  {educationEntries.map((entry, index) => (
+                    <div key={entry.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-medium text-gray-800">Education Entry {index + 1}</h4>
+                        {educationEntries.length > 1 && (
+                          <button
+                            onClick={() => removeEducationEntry(entry.id)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                            title="Remove entry"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="form-label">Name of Degree</label>
+                          <select
+                            value={entry.degreeName}
+                            onChange={(e) => handleEducationChange(entry.id, 'degreeName', e.target.value)}
+                            className="input-field"
+                          >
+                            <option value="">Select degree</option>
+                            <option value="SSC">SSC</option>
+                            <option value="HSC">HSC</option>
+                            <option value="Honours">Honours</option>
+                            <option value="Masters">Masters</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="form-label">Board</label>
+                          <input
+                            type="text"
+                            value={entry.board}
+                            onChange={(e) => handleEducationChange(entry.id, 'board', e.target.value)}
+                            className="input-field"
+                            placeholder="Enter board/university"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="form-label">Institution</label>
+                          <input
+                            type="text"
+                            value={entry.institution}
+                            onChange={(e) => handleEducationChange(entry.id, 'institution', e.target.value)}
+                            className="input-field"
+                            placeholder="Enter institution name"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="form-label">Academic Year</label>
+                          <input
+                            type="text"
+                            value={entry.academicYear}
+                            onChange={(e) => handleEducationChange(entry.id, 'academicYear', e.target.value)}
+                            className="input-field"
+                            placeholder="e.g., 2020-2024"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="form-label">Result</label>
+                          <input
+                            type="text"
+                            value={entry.result}
+                            onChange={(e) => handleEducationChange(entry.id, 'result', e.target.value)}
+                            className="input-field"
+                            placeholder="Enter CGPA/GPA/Grade"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={addEducationEntry}
+                    className="flex items-center space-x-2 text-[#00c0ef] hover:text-cyan-600 font-medium transition-colors border border-[#00c0ef] hover:border-cyan-600 px-4 py-2 rounded-lg"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Another Education Entry</span>
+                  </button>
+                </div>
+
+                {/* Occupation Section */}
+                <div className="border-t border-gray-200 pt-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Occupation <span className="text-sm font-normal text-gray-500">(Optional)</span></h4>
+                  
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="form-label">Profession</label>
+                      <input
+                        type="text"
+                        name="profession"
+                        value={occupationInfo.profession}
+                        onChange={handleOccupationChange}
+                        className="input-field"
+                        placeholder="Enter profession"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="form-label">Institute</label>
+                      <input
+                        type="text"
+                        name="institute"
+                        value={occupationInfo.institute}
+                        onChange={handleOccupationChange}
+                        className="input-field"
+                        placeholder="Enter institute/company"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="form-label">Department</label>
+                      <input
+                        type="text"
+                        name="department"
+                        value={occupationInfo.department}
+                        onChange={handleOccupationChange}
+                        className="input-field"
+                        placeholder="Enter department"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Save Button */}
-            <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="mt-8 pt-6 border-t border-gray-200">
               <button
                 onClick={handleSave}
                 disabled={isLoading}
