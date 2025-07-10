@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
-import { profileApi } from "../../services/profileApi";
 import { AcademicInfo } from "../../types/profile";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
