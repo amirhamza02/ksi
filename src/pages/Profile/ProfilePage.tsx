@@ -168,6 +168,16 @@ const ProfilePage: React.FC = () => {
       newErrors.emergencyContact = "Emergency Contact is required";
     }
 
+    // IUB student validation
+    if (basicInfo.isIubian === "yes") {
+      if (!basicInfo.studentId?.trim()) {
+        newErrors.studentId = "Student ID is required for IUB students";
+      }
+      if (!basicInfo.department?.trim()) {
+        newErrors.department = "Department is required for IUB students";
+      }
+    }
+
     // Always set errors, even if empty
     setErrors((prev) => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
@@ -489,7 +499,7 @@ const ProfilePage: React.FC = () => {
                     <>
                       <div>
                         <label className="form-label">
-                          Student ID{" "}
+                          Student ID <span className="text-red-500">*</span>{" "}
                           <span className="text-sm text-gray-500">
                             (Applicable for only IUB student)
                           </span>
@@ -499,14 +509,19 @@ const ProfilePage: React.FC = () => {
                           name="studentId"
                           value={basicInfo.studentId}
                           onChange={handleBasicChange}
-                          className="input-field"
+                          className={`input-field ${
+                            errors.studentId ? "border-red-500" : ""
+                          }`}
                           placeholder="Enter student ID"
                         />
+                        {errors.studentId && (
+                          <p className="error-text">{errors.studentId}</p>
+                        )}
                       </div>
 
                       <div>
                         <label className="form-label">
-                          Department{" "}
+                          Department <span className="text-red-500">*</span>{" "}
                           <span className="text-sm text-gray-500">
                             (Applicable for only IUB student)
                           </span>
@@ -516,9 +531,14 @@ const ProfilePage: React.FC = () => {
                           name="department"
                           value={basicInfo.department}
                           onChange={handleBasicChange}
-                          className="input-field"
+                          className={`input-field ${
+                            errors.department ? "border-red-500" : ""
+                          }`}
                           placeholder="Enter department"
                         />
+                        {errors.department && (
+                          <p className="error-text">{errors.department}</p>
+                        )}
                       </div>
                     </>
                   )}
