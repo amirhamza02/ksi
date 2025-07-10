@@ -24,7 +24,7 @@ export interface AcademicInfo {
     nameOfDegree: string;
     boardOfEducation: string;
     institution: string;
-    academicYear?: number;
+    academicYear: string;
     result: string;
 }
 

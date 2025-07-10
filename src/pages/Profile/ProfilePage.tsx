@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "SSC",
       boardOfEducation: "",
       institution: "",
-      academicYear: 2020,
+      academicYear:'',
       result: "",
     },
     {
@@ -46,7 +46,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "HSC",
       boardOfEducation: "",
       institution: "",
-      academicYear: 2020,
+      academicYear:'',
       result: "",
     },
     {
@@ -54,7 +54,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "Honours",
       boardOfEducation: "",
       institution: "",
-      academicYear: 2020,
+      academicYear:'',
       result: "",
     },
     {
@@ -62,7 +62,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "Masters",
       boardOfEducation: "",
       institution: "",
-      academicYear: 2020,
+      academicYear:'',
       result: "",
     },
   ]);
@@ -122,7 +122,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "",
       boardOfEducation: "",
       institution: "",
-      academicYear: 0,
+      academicYear:'',
       result: "",
     };
     setEducationEntries((prev) => [...prev, newEntry]);
@@ -190,10 +190,9 @@ const ProfilePage: React.FC = () => {
     // At least one education entry must be filled (any field)
     const hasAnyEducation = educationEntries.some(
       (entry) =>
-        entry.nameOfDegree ||
         entry.boardOfEducation.trim() ||
         entry.institution.trim() ||
-        (entry.academicYear ?? 0) > 0 ||
+        entry.academicYear.trim()  ||
         entry.result.trim()
     );
 
@@ -205,10 +204,9 @@ const ProfilePage: React.FC = () => {
     educationEntries.forEach((entry, index) => {
       // If any of the fields are filled, all must be filled
       const anyFieldFilled =
-        entry.nameOfDegree ||
         entry.boardOfEducation.trim() ||
         entry.institution.trim() ||
-        (entry.academicYear ?? 0) > 0 ||
+        entry.academicYear.trim() ||
         entry.result.trim();
 
       if (anyFieldFilled) {
@@ -222,11 +220,6 @@ const ProfilePage: React.FC = () => {
         }
         if (!entry.institution.trim()) {
           newErrors[`institution_${index}`] = "Institution is required";
-          isValid = false;
-        }
-        if (!entry.academicYear || entry.academicYear <= 2000) {
-          newErrors[`academicYear_${index}`] =
-            "Academic Year must be greater than 2000";
           isValid = false;
         }
         if (!entry.result.trim()) {
