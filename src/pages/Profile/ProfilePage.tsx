@@ -366,6 +366,11 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
 
+        {errors.general && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+            {errors.general}
+          </div>
+        )}
         <div className="bg-white rounded-lg card-shadow">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
@@ -391,11 +396,6 @@ const ProfilePage: React.FC = () => {
           <div className="p-6">
             {activeTab === "basic" && (
               <div className="space-y-6">
-                {errors.general && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                    {errors.general}
-                  </div>
-                )}
 
                 <h3 className="text-lg font-semibold text-gray-900">
                   Basic Information
