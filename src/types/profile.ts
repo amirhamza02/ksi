@@ -6,11 +6,11 @@ export interface Profile {
     email: string;
     isIubian: boolean;
     studentId: string;
-    department: string;
+    departmentName: string;
     dateOfBirth: string;
     nationality: string;
     contactNumber: string;
-    emergencyContact: string;
+    emergencyContactNumber: string;
     fatherFirstName: string;
     fatherLastName: string;
     motherFirstName: string;

@@ -34,11 +34,11 @@ const ProfilePage: React.FC = () => {
     email: user?.email || "",
     isIubian: "",
     studentId: "",
-    department: "",
+    departmentName: "",
     dateOfBirth: "",
     nationality: "",
     contactNumber: user?.phone || "",
-    emergencyContact: "",
+    emergencyContactNumber: "",
     fatherFirstName: "",
     fatherLastName: "",
     motherFirstName: "",
@@ -117,11 +117,11 @@ const ProfilePage: React.FC = () => {
         email: personalInfo.email || user?.email || "",
         isIubian: personalInfo.isIubian ? "yes" : "no",
         studentId: personalInfo.studentId || "",
-        department: personalInfo.department || "",
+        departmentName: personalInfo.departmentName || "",
         dateOfBirth: formatDateForInput(personalInfo.dateOfBirth),
         nationality: personalInfo.nationality || "",
-        contactNumber: personalInfo.contactNumber || user?.phone || "",
-        emergencyContact: personalInfo.emergencyContact || "",
+        contactNumber:  personalInfo?.contactNumber || "",
+        emergencyContactNumber: personalInfo.emergencyContactNumber || "",
         fatherFirstName: personalInfo.fatherFirstName || "",
         fatherLastName: personalInfo.fatherLastName || "",
         motherFirstName: personalInfo.motherFirstName || "",
@@ -220,7 +220,7 @@ const ProfilePage: React.FC = () => {
     if (!basicInfo.contactNumber?.trim()) {
       newErrors.contactNumber = "Contact Number is required";
     }
-    if (!basicInfo.emergencyContact?.trim()) {
+    if (!basicInfo.emergencyContactNumber?.trim()) {
       newErrors.emergencyContact = "Emergency Contact is required";
     }
 
@@ -229,8 +229,8 @@ const ProfilePage: React.FC = () => {
       if (!basicInfo.studentId?.trim()) {
         newErrors.studentId = "Student ID is required for IUB students";
       }
-      if (!basicInfo.department?.trim()) {
-        newErrors.department = "Department is required for IUB students";
+      if (!basicInfo.departmentName?.trim()) {
+        newErrors.departmentName = "Department is required for IUB students";
       }
     }
 
@@ -314,11 +314,11 @@ const ProfilePage: React.FC = () => {
           email: basicInfo.email,
           isIubian: basicInfo.isIubian === "yes",
           studentId: basicInfo.studentId,
-          department: basicInfo.department,
+          departmentName: basicInfo.departmentName,
           dateOfBirth: basicInfo.dateOfBirth,
           nationality: basicInfo.nationality,
           contactNumber: basicInfo.contactNumber,
-          emergencyContact: basicInfo.emergencyContact,
+          emergencyContactNumber: basicInfo.emergencyContactNumber,
           fatherFirstName: basicInfo.fatherFirstName,
           fatherLastName: basicInfo.fatherLastName,
           motherFirstName: basicInfo.motherFirstName,
@@ -545,8 +545,8 @@ const ProfilePage: React.FC = () => {
                         </label>
                         <input
                           type="text"
-                          name="department"
-                          value={basicInfo.department}
+                          name="departmentName"
+                          value={basicInfo.departmentName}
                           onChange={handleBasicChange}
                           className={`input-field ${
                             errors.department ? "border-red-500" : ""
@@ -554,7 +554,7 @@ const ProfilePage: React.FC = () => {
                           placeholder="Enter department"
                         />
                         {errors.department && (
-                          <p className="error-text">{errors.department}</p>
+                          <p className="error-text">{errors.departmentName}</p>
                         )}
                       </div>
                     </>
@@ -623,16 +623,16 @@ const ProfilePage: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      name="emergencyContact"
-                      value={basicInfo.emergencyContact}
+                      name="emergencyContactNumber"
+                      value={basicInfo.emergencyContactNumber}
                       onChange={handleBasicChange}
                       className={`input-field ${
-                        errors.emergencyContact ? "border-red-500" : ""
+                        errors.emergencyContactNumber ? "border-red-500" : ""
                       }`}
                       placeholder="Enter emergency contact"
                     />
-                    {errors.emergencyContact && (
-                      <p className="error-text">{errors.emergencyContact}</p>
+                    {errors.emergencyContactNumber && (
+                      <p className="error-text">{errors.emergencyContactNumber}</p>
                     )}
                   </div>
                 </div>
