@@ -44,3 +44,11 @@ export interface EducationRequest {
     education: AcademicInfo[];
 }
 
+export interface ProfileState {
+    personalInfo: Profile | null;
+    educationInfo: AcademicInfo[];
+    professionalInfo: ProfessionalInfo | null;
+    loading: boolean;
+    error: string | null;
+    isLoaded: boolean;
+}
