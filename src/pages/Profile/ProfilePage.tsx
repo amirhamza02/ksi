@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
 import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
-import api from "../../lib/api";
-import { profileApi } from "../../services/profileApi";
 import { AcademicInfo } from "../../types/profile";
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
+  const { 
+    personalInfo, 
+    educationInfo, 
+    loading: profileLoading, 
+    error: profileError,
+    isLoaded 
+  } = useAppSelector((state) => state.profile);
+  
   const [activeTab, setActiveTab] = useState("basic");
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -73,22 +79,50 @@ const ProfilePage: React.FC = () => {
     department: "",
   });
 
-  // Load saved data on component mount
+  // Load profile data on component mount
   useEffect(() => {
-    if (user?.id) {
-      const savedProfile = localStorage.getItem(`ksi_profile_${user.id}`);
-      if (savedProfile) {
-        try {
-          const profileData = JSON.parse(savedProfile);
-          if (profileData.basic) setBasicInfo(profileData.basic);
-          if (profileData.education) setEducationEntries(profileData.education);
-          if (profileData.occupation) setOccupationInfo(profileData.occupation);
-        } catch (error) {
-          console.error("Error loading saved profile:", error);
-        }
-      }
+    if (user?.id && !isLoaded) {
+      dispatch(fetchProfile());
     }
-  }, [user?.id]);
+  }, [user?.id, isLoaded, dispatch]);
+
+  // Update form fields when profile data is loaded from store
+  useEffect(() => {
+    if (personalInfo) {
+      setBasicInfo({
+        firstName: personalInfo.firstName || user?.firstName || "",
+        lastName: personalInfo.lastName || user?.lastName || "",
+        email: personalInfo.email || user?.email || "",
+        isIubian: personalInfo.isIubian ? "yes" : "no",
+        studentId: personalInfo.studentId || "",
+        department: personalInfo.department || "",
+        dateOfBirth: personalInfo.dateOfBirth || "",
+        nationality: personalInfo.nationality || "",
+        contactNumber: personalInfo.contactNumber || user?.phone || "",
+        emergencyContact: personalInfo.emergencyContact || "",
+        fatherFirstName: personalInfo.fatherFirstName || "",
+        fatherLastName: personalInfo.fatherLastName || "",
+        motherFirstName: personalInfo.motherFirstName || "",
+        motherLastName: personalInfo.motherLastName || "",
+        presentAddress: personalInfo.presentAddress || "",
+        permanentAddress: personalInfo.permanentAddress || "",
+      });
+    }
+  }, [personalInfo, user]);
+
+  // Update education entries when education data is loaded from store
+  useEffect(() => {
+    if (educationInfo && educationInfo.length > 0) {
+      setEducationEntries(educationInfo);
+    }
+  }, [educationInfo]);
+
+  // Clear profile errors when component unmounts or user changes
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleBasicChange = (
     e: React.ChangeEvent<
@@ -233,61 +267,10 @@ const ProfilePage: React.FC = () => {
     return isValid;
   };
 
-  const savePersonalInfo = async () => {
-    try {
-      const personalInfoData = {
-        firstName: basicInfo.firstName,
-        lastName: basicInfo.lastName,
-        email: basicInfo.email,
-        isIubian: basicInfo.isIubian === "yes",
-        studentId: basicInfo.studentId,
-        department: basicInfo.department,
-        dateOfBirth: basicInfo.dateOfBirth,
-        nationality: basicInfo.nationality,
-        contactNumber: basicInfo.contactNumber,
-        emergencyContact: basicInfo.emergencyContact,
-        fatherFirstName: basicInfo.fatherFirstName,
-        fatherLastName: basicInfo.fatherLastName,
-        motherFirstName: basicInfo.motherFirstName,
-        motherLastName: basicInfo.motherLastName,
-        presentAddress: basicInfo.presentAddress,
-        permanentAddress: basicInfo.permanentAddress,
-      };
-
-      const response = await profileApi.submitPersonalInfo(personalInfoData);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error saving personal info:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to save personal information"
-      );
-    }
-  };
-
-  const saveEducationEntries = async () => {
-    try {
-      const educationData = educationEntries.map((entry) => ({
-        id: entry.id,
-        userId: typeof user?.id === "number" ? user.id : 0, // Ensure userId is a number
-        nameOfDegree: entry.nameOfDegree,
-        boardOfEducation: entry.boardOfEducation,
-        institution: entry.institution,
-        academicYear: entry.academicYear,
-        result: entry.result,
-      }));
-
-      const response = await profileApi.submitEducationInfo(educationData);
-    } catch (error: any) {
-      console.error("Error saving education entries:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to save education entries"
-      );
-    }
-  };
-
   const handleSave = async () => {
     // Clear previous errors first
     setErrors({});
+    dispatch(clearError());
 
     setIsLoading(true);
 
@@ -302,7 +285,27 @@ const ProfilePage: React.FC = () => {
           }));
           return;
         }
-        await savePersonalInfo();
+        
+        const personalInfoData = {
+          firstName: basicInfo.firstName,
+          lastName: basicInfo.lastName,
+          email: basicInfo.email,
+          isIubian: basicInfo.isIubian === "yes",
+          studentId: basicInfo.studentId,
+          department: basicInfo.department,
+          dateOfBirth: basicInfo.dateOfBirth,
+          nationality: basicInfo.nationality,
+          contactNumber: basicInfo.contactNumber,
+          emergencyContact: basicInfo.emergencyContact,
+          fatherFirstName: basicInfo.fatherFirstName,
+          fatherLastName: basicInfo.fatherLastName,
+          motherFirstName: basicInfo.motherFirstName,
+          motherLastName: basicInfo.motherLastName,
+          presentAddress: basicInfo.presentAddress,
+          permanentAddress: basicInfo.permanentAddress,
+        };
+        
+        await dispatch(updatePersonalInfo(personalInfoData)).unwrap();
       } else if (activeTab === "education") {
         // Validate and save education information
         if (!validateAcademicInfo()) {
@@ -313,7 +316,18 @@ const ProfilePage: React.FC = () => {
           }));
           return;
         }
-        await saveEducationEntries();
+        
+        const educationData = educationEntries.map((entry) => ({
+          id: entry.id,
+          userId: typeof user?.id === "number" ? user.id : 0,
+          nameOfDegree: entry.nameOfDegree,
+          boardOfEducation: entry.boardOfEducation,
+          institution: entry.institution,
+          academicYear: entry.academicYear,
+          result: entry.result,
+        }));
+        
+        await dispatch(updateEducationInfo(educationData)).unwrap();
       }
 
       // Save to localStorage
@@ -366,9 +380,17 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
 
-        {errors.general && (
+        {(errors.general || profileError) && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-            {errors.general}
+            {errors.general || profileError}
+          </div>
+        )}
+        
+        {/* Loading indicator for profile data */}
+        {profileLoading && !isLoaded && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            Loading profile data...
           </div>
         )}
         <div className="bg-white rounded-lg card-shadow">
@@ -738,7 +760,7 @@ const ProfilePage: React.FC = () => {
                             onChange={(e) =>
                               handleEducationChange(
                                 entry.id,
-                                "degreeName",
+                                "nameOfDegree",
                                 e.target.value
                               )
                             }
@@ -761,7 +783,7 @@ const ProfilePage: React.FC = () => {
                             onChange={(e) =>
                               handleEducationChange(
                                 entry.id,
-                                "board",
+                                "boardOfEducation",
                                 e.target.value
                               )
                             }
@@ -886,11 +908,11 @@ const ProfilePage: React.FC = () => {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <button
                 onClick={handleSave}
-                disabled={isLoading}
+                disabled={isLoading || profileLoading}
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
-                <span>{isLoading ? "Saving..." : "Save Profile"}</span>
+                <span>{isLoading || profileLoading ? "Saving..." : "Save Profile"}</span>
               </button>
             </div>
           </div>
