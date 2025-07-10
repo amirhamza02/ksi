@@ -4,6 +4,14 @@ import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
 import { profileApi } from "../../services/profileApi";
 import { AcademicInfo } from "../../types/profile";
 import { useAuth } from "../../contexts/AuthContext";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { 
+  fetchProfile, 
+  updatePersonalInfo, 
+  updateEducationInfo, 
+  clearError 
+} from "../../store/slices/profileSlice";
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
@@ -46,7 +54,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "SSC",
       boardOfEducation: "",
       institution: "",
-      academicYear:'',
+      academicYear: '',
       result: "",
     },
     {
@@ -54,7 +62,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "HSC",
       boardOfEducation: "",
       institution: "",
-      academicYear:'',
+      academicYear: '',
       result: "",
     },
     {
@@ -62,7 +70,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "Honours",
       boardOfEducation: "",
       institution: "",
-      academicYear:'',
+      academicYear: '',
       result: "",
     },
     {
@@ -70,7 +78,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "Masters",
       boardOfEducation: "",
       institution: "",
-      academicYear:'',
+      academicYear: '',
       result: "",
     },
   ]);
@@ -158,7 +166,7 @@ const ProfilePage: React.FC = () => {
       nameOfDegree: "",
       boardOfEducation: "",
       institution: "",
-      academicYear:'',
+      academicYear: '',
       result: "",
     };
     setEducationEntries((prev) => [...prev, newEntry]);
@@ -228,7 +236,7 @@ const ProfilePage: React.FC = () => {
       (entry) =>
         entry.boardOfEducation.trim() ||
         entry.institution.trim() ||
-        entry.academicYear.trim()  ||
+        entry.academicYear.trim() ||
         entry.result.trim()
     );
 
@@ -376,6 +384,7 @@ const ProfilePage: React.FC = () => {
           </p>
         </div>
 
+        {/* Common message area */}
         {successMessage && (
           <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
             {successMessage}
@@ -395,6 +404,7 @@ const ProfilePage: React.FC = () => {
             Loading profile data...
           </div>
         )}
+
         <div className="bg-white rounded-lg card-shadow">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
@@ -420,7 +430,6 @@ const ProfilePage: React.FC = () => {
           <div className="p-6">
             {activeTab === "basic" && (
               <div className="space-y-6">
-
                 <h3 className="text-lg font-semibold text-gray-900">
                   Basic Information
                 </h3>
@@ -763,7 +772,9 @@ const ProfilePage: React.FC = () => {
                                 e.target.value
                               )
                             }
-                            className="input-field"
+                            className={`input-field ${
+                              errors[`degreeName_${index}`] ? "border-red-500" : ""
+                            }`}
                           >
                             <option value="">Select degree</option>
                             <option value="SSC">SSC</option>
@@ -772,6 +783,9 @@ const ProfilePage: React.FC = () => {
                             <option value="Masters">Masters</option>
                             <option value="Other">Other</option>
                           </select>
+                          {errors[`degreeName_${index}`] && (
+                            <p className="error-text">{errors[`degreeName_${index}`]}</p>
+                          )}
                         </div>
 
                         <div>
@@ -786,9 +800,14 @@ const ProfilePage: React.FC = () => {
                                 e.target.value
                               )
                             }
-                            className="input-field"
+                            className={`input-field ${
+                              errors[`board_${index}`] ? "border-red-500" : ""
+                            }`}
                             placeholder="Enter board/university"
                           />
+                          {errors[`board_${index}`] && (
+                            <p className="error-text">{errors[`board_${index}`]}</p>
+                          )}
                         </div>
 
                         <div>
@@ -803,9 +822,14 @@ const ProfilePage: React.FC = () => {
                                 e.target.value
                               )
                             }
-                            className="input-field"
+                            className={`input-field ${
+                              errors[`institution_${index}`] ? "border-red-500" : ""
+                            }`}
                             placeholder="Enter institution name"
                           />
+                          {errors[`institution_${index}`] && (
+                            <p className="error-text">{errors[`institution_${index}`]}</p>
+                          )}
                         </div>
 
                         <div>
@@ -837,9 +861,14 @@ const ProfilePage: React.FC = () => {
                                 e.target.value
                               )
                             }
-                            className="input-field"
+                            className={`input-field ${
+                              errors[`result_${index}`] ? "border-red-500" : ""
+                            }`}
                             placeholder="Enter CGPA/GPA/Grade"
                           />
+                          {errors[`result_${index}`] && (
+                            <p className="error-text">{errors[`result_${index}`]}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -922,20 +951,3 @@ const ProfilePage: React.FC = () => {
 };
 
 export default ProfilePage;
-
-function useAppDispatch() {
-  throw new Error("Function not implemented.");
-}
-
-
-function useAppSelector(arg0: (state: any) => any): { personalInfo: any; educationInfo: any; loading: any; error: any; isLoaded: any; } {
-  throw new Error("Function not implemented.");
-}
-
-
-// TODO: Replace this import path with the correct one for your project
-
-
-function clearError(): any {
-  throw new Error("Function not implemented.");
-}
