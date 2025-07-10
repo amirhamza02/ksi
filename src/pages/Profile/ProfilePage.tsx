@@ -292,49 +292,28 @@ const ProfilePage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Always save personal info since it's required
-      if (activeTab == "basic") {
-        // Always validate basic info when saving, regardless of active tab
+      if (activeTab === "basic") {
+        // Validate and save basic information
         if (!validateBasicInfo()) {
-          // If validation fails and we're not on basic tab, switch to it
-          if (activeTab !== "basic") {
-            setActiveTab("basic");
-          }
-
-          // Show a general error message
           setErrors((prev) => ({
             ...prev,
             general:
               "Please fill in all required fields in the Basic Information section before saving.",
           }));
-
-          // Scroll to top to show the error message
-          setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }, 100);
           return;
-        } else {
-          await savePersonalInfo();
         }
-      } else {
-        // If we're on the education tab, validate basic info first
+        await savePersonalInfo();
+      } else if (activeTab === "education") {
+        // Validate and save education information
         if (!validateAcademicInfo()) {
-          setActiveTab("academic");
-          // Show a general error message
           setErrors((prev) => ({
             ...prev,
             general:
-              "Please fill in all required fields in the academic Information section before saving.",
+              "Please fill in all required fields in the Education section before saving.",
           }));
-
-          // Scroll to top to show the error message
-          setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }, 100);
           return;
-        } else {
-          await saveEducationEntries();
         }
+        await saveEducationEntries();
       }
 
       // Save to localStorage
@@ -348,7 +327,7 @@ const ProfilePage: React.FC = () => {
         JSON.stringify(profileData)
       );
 
-      setSuccessMessage("Profile updated successfully!");
+      setSuccessMessage(`${activeTab === "basic" ? "Basic Information" : "Education"} updated successfully!`);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error("Error saving profile:", error);
