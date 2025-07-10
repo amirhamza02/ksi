@@ -98,6 +98,19 @@ const ProfilePage: React.FC = () => {
   // Update form fields when profile data is loaded from store
   useEffect(() => {
     if (personalInfo) {
+      // Helper function to format date from API response
+      const formatDateForInput = (dateString: string | null | undefined): string => {
+        if (!dateString) return '';
+        try {
+          // Extract just the date part from ISO string (YYYY-MM-DDTHH:mm:ss -> YYYY-MM-DD)
+          const date = new Date(dateString);
+          return date.toISOString().split('T')[0];
+        } catch (error) {
+          console.error('Error formatting date:', error);
+          return '';
+        }
+      };
+
       setBasicInfo({
         firstName: personalInfo.firstName || user?.firstName || "",
         lastName: personalInfo.lastName || user?.lastName || "",
@@ -105,7 +118,7 @@ const ProfilePage: React.FC = () => {
         isIubian: personalInfo.isIubian ? "yes" : "no",
         studentId: personalInfo.studentId || "",
         department: personalInfo.department || "",
-        dateOfBirth: personalInfo.dateOfBirth || "",
+        dateOfBirth: formatDateForInput(personalInfo.dateOfBirth),
         nationality: personalInfo.nationality || "",
         contactNumber: personalInfo.contactNumber || user?.phone || "",
         emergencyContact: personalInfo.emergencyContact || "",
