@@ -30,7 +30,6 @@ export interface AuthContextType {
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   changePassword: (data: ChangePasswordData) => Promise<boolean>;
-  fetchProfile: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;

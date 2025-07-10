@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
 import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
-import api from "../../lib/api";
 import { profileApi } from "../../services/profileApi";
 import { AcademicInfo } from "../../types/profile";
 
@@ -309,7 +308,7 @@ const ProfilePage: React.FC = () => {
           setErrors((prev) => ({
             ...prev,
             general:
-              "Please fill in all required fields in the Education section before saving.",
+              "Please fill in at least one Education section before saving.",
           }));
           return;
         }
@@ -704,9 +703,6 @@ const ProfilePage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900">
                     Education
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    Please begin with the latest academic qualification
-                  </p>
                 </div>
 
                 <div className="space-y-6">
