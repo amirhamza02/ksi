@@ -66,7 +66,7 @@ const DashboardPage: React.FC = () => {
   const dashboardStats = [
     {
       title: 'Profile Status',
-      value: 'Incomplete',
+      value: 'Profile Info',
       icon: User,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',

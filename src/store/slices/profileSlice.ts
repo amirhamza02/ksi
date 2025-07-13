@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { Profile, AcademicInfo, ProfessionalInfo, ProfileState } from '../../types/profile'
+import { Profile, AcademicInfo, Occupation, ProfileState } from '../../types/profile'
 import { profileApi } from '../../services/profileApi'
 
 const initialState: ProfileState = {
   personalInfo: null,
   academicInformations: [],
-  professionalInfo: null,
+  occupation: null,
   loading: false,
   error: null,
   isLoaded: false,
@@ -66,7 +66,7 @@ const profileSlice = createSlice({
     resetProfile: (state) => {
       state.personalInfo = null
       state.academicInformations = []
-      state.professionalInfo = null
+      state.occupation = null
       state.isLoaded = false
       state.error = null
     },
@@ -89,13 +89,14 @@ const profileSlice = createSlice({
         }
         
         // Handle education info
-        if (data.educationInfo || data.education) {
-          state.academicInformations = data.educationInfo || data.education || []
+        if (data.academicInformations || data.academicInformations) {
+          state.academicInformations = data.academicInformations || []
         }
+
         
         // Handle professional info
-        if (data.professionalInfo) {
-          state.professionalInfo = data.professionalInfo
+        if (data.occupations || data.occupations.length > 0) {
+          state.occupation = data.occupations[0] || null
         }
       })
       .addCase(fetchProfile.rejected, (state, action) => {

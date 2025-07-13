@@ -17,6 +17,7 @@ const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { 
     personalInfo, 
+    occupation,
     academicInformations, 
     loading: profileLoading, 
     error: profileError,
@@ -138,6 +139,18 @@ const ProfilePage: React.FC = () => {
       setEducationEntries(academicInformations);
     }
   }, [academicInformations]);
+
+  // Update occupation info when occupation data is loaded from store
+  useEffect(() => {
+    console.log("Occupation data: ", occupation);
+    if (occupation) {
+      setOccupationInfo({
+        profession: occupation.profession || "",
+        institute: occupation.institute || "",
+        department: occupation.department || "",
+      });
+    }
+  }, [occupation]);
 
   // Clear profile errors when component unmounts or user changes
   useEffect(() => {
@@ -351,11 +364,19 @@ const ProfilePage: React.FC = () => {
             result: entry.result,
           }));
 
+          const occupationData = {
+            profession: occupationInfo.profession,
+            institute: occupationInfo.institute,
+            department: occupationInfo.department,
+            userId: typeof user?.id === "number" ? user.id : 0,
+            isContinue: false, // or set based on your logic
+          }
+
 
       const profileData : ProfileState = {
         academicInformations: educationData,
         personalInfo: null,
-        professionalInfo: null,
+        occupation: occupationData,
         loading: false,
         error: null,
         isLoaded: false
@@ -369,7 +390,7 @@ const ProfilePage: React.FC = () => {
       const profileData = {
         basic: basicInfo,
         education: educationEntries,
-        occupation: occupationInfo,
+        occupation: occupation,
       };
       localStorage.setItem(
         `ksi_profile_${user?.id}`,
@@ -942,7 +963,6 @@ const ProfilePage: React.FC = () => {
                         placeholder="Enter institute/company"
                       />
                     </div>
-
                     <div>
                       <label className="form-label">Department</label>
                       <input

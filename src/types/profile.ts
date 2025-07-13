@@ -28,7 +28,7 @@ export interface AcademicInfo {
     result: string;
 }
 
-export interface ProfessionalInfo {
+export interface Occupation {
     userId: number;
     profession?: string;
     institution?: string;
@@ -46,8 +46,8 @@ export interface EducationRequest {
 
 export interface ProfileState {
     personalInfo: Profile | null;
-    educationInfo: AcademicInfo[];
-    professionalInfo: ProfessionalInfo | null;
+    academicInformations: AcademicInfo[];
+    occupation: Occupation | null;
     loading: boolean;
     error: string | null;
     isLoaded: boolean;
