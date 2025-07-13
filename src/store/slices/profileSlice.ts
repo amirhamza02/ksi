@@ -4,7 +4,7 @@ import { profileApi } from '../../services/profileApi'
 
 const initialState: ProfileState = {
   personalInfo: null,
-  educationInfo: [],
+  academicInformations: [],
   professionalInfo: null,
   loading: false,
   error: null,
@@ -38,7 +38,7 @@ export const updatePersonalInfo = createAsyncThunk(
 
 export const updateEducationInfo = createAsyncThunk(
   'profile/updateEducationInfo',
-  async (educationData: AcademicInfo[], { rejectWithValue }) => {
+  async (educationData:ProfileState, { rejectWithValue }) => {
     try {
       const response = await profileApi.submitEducationInfo(educationData)
       return { educationInfo: educationData, response }
@@ -61,11 +61,11 @@ const profileSlice = createSlice({
       }
     },
     updateEducationInfoLocal: (state, action: PayloadAction<AcademicInfo[]>) => {
-      state.educationInfo = action.payload
+      state.academicInformations = action.payload
     },
     resetProfile: (state) => {
       state.personalInfo = null
-      state.educationInfo = []
+      state.academicInformations = []
       state.professionalInfo = null
       state.isLoaded = false
       state.error = null
@@ -90,7 +90,7 @@ const profileSlice = createSlice({
         
         // Handle education info
         if (data.educationInfo || data.education) {
-          state.educationInfo = data.educationInfo || data.education || []
+          state.academicInformations = data.educationInfo || data.education || []
         }
         
         // Handle professional info
@@ -124,7 +124,7 @@ const profileSlice = createSlice({
       })
       .addCase(updateEducationInfo.fulfilled, (state, action) => {
         state.loading = false
-        state.educationInfo = action.payload.educationInfo
+        state.academicInformations = action.payload.educationInfo.academicInformations
       })
       .addCase(updateEducationInfo.rejected, (state, action) => {
         state.loading = false

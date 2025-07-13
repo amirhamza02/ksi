@@ -1,5 +1,6 @@
 import api from '../lib/api';
 import { AcademicInfo, PersonalInfoRequest } from '../types/profile';
+import { ProfileState } from '../types/profile';
 
 // Example API call functions
 
@@ -13,8 +14,9 @@ export const profileApi = {
         const response = await api.post('/Profiles/personal-info', personalInfoData);
         return response.data;
     },
-    submitEducationInfo: async (educationData: AcademicInfo[]) => {
-        const response = await api.post('/Profiles/education', { education: educationData });
+    submitEducationInfo: async ( academicInformation: ProfileState) => {
+      
+        const response = await api.post('/Profiles/education-info', academicInformation);
         return response.data;
     }
 };

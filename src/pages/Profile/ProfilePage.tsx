@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
-import { AcademicInfo } from "../../types/profile";
+import { AcademicInfo, ProfileState } from "../../types/profile";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
 import { useAppSelector } from "../../hooks/useAppSelector";
@@ -17,7 +17,7 @@ const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { 
     personalInfo, 
-    educationInfo, 
+    academicInformations, 
     loading: profileLoading, 
     error: profileError,
     isLoaded 
@@ -134,10 +134,10 @@ const ProfilePage: React.FC = () => {
 
   // Update education entries when education data is loaded from store
   useEffect(() => {
-    if (educationInfo && educationInfo.length > 0) {
-      setEducationEntries(educationInfo);
+    if (academicInformations && academicInformations.length > 0) {
+      setEducationEntries(academicInformations);
     }
-  }, [educationInfo]);
+  }, [academicInformations]);
 
   // Clear profile errors when component unmounts or user changes
   useEffect(() => {
@@ -339,17 +339,30 @@ const ProfilePage: React.FC = () => {
           return;
         }
         
-        const educationData = educationEntries.map((entry) => ({
-          id: entry.id,
-          userId: typeof user?.id === "number" ? user.id : 0,
-          nameOfDegree: entry.nameOfDegree,
-          boardOfEducation: entry.boardOfEducation,
-          institution: entry.institution,
-          academicYear: entry.academicYear,
-          result: entry.result,
-        }));
+        const educationData = educationEntries
+          .filter(entry => entry.institution && entry.academicYear && entry.result)
+          .map((entry) => ({
+            id: entry.id,
+            userId: typeof user?.id === "number" ? user.id : 0,
+            nameOfDegree: entry.nameOfDegree,
+            boardOfEducation: entry.boardOfEducation,
+            institution: entry.institution,
+            academicYear: entry.academicYear,
+            result: entry.result,
+          }));
+
+
+      const profileData : ProfileState = {
+        academicInformations: educationData,
+        personalInfo: null,
+        professionalInfo: null,
+        loading: false,
+        error: null,
+        isLoaded: false
+      };
+
         
-        await dispatch(updateEducationInfo(educationData)).unwrap();
+        await dispatch(updateEducationInfo(profileData)).unwrap();
       }
 
       // Save to localStorage
@@ -365,6 +378,7 @@ const ProfilePage: React.FC = () => {
 
       setSuccessMessage(`${activeTab === "basic" ? "Basic Information" : "Education"} updated successfully!`);
       setTimeout(() => setSuccessMessage(""), 3000);
+
     } catch (error) {
       console.error("Error saving profile:", error);
       setErrors({
