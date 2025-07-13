@@ -170,7 +170,6 @@ const ProfilePage: React.FC = () => {
       
       setEducationEntries([...mergedEntries, ...additionalEntries]);
     }
-    }
   }, [academicInformations]);
 
   // Clear profile errors when component unmounts or user changes
