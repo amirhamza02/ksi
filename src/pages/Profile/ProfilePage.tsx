@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../../hooks/useAppDispatch';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { useAppSelector } from '../../hooks/useAppSelector';
 import { fetchProfile, updatePersonalInfo, updateEducationInfo, clearError } from '../../store/slices/profileSlice';
 
 interface EducationEntry {
