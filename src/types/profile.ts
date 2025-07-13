@@ -1,6 +1,8 @@
 import { User } from "./auth";
 
 export interface Profile {
+    fullName: string;
+    phoneNumber: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -46,7 +48,7 @@ export interface EducationRequest {
 
 export interface ProfileState {
     personalInfo: Profile | null;
-    educationInfo: AcademicInfo[];
+    academicInformations: AcademicInfo[];
     professionalInfo: ProfessionalInfo | null;
     loading: boolean;
     error: string | null;

@@ -38,7 +38,7 @@ export const updatePersonalInfo = createAsyncThunk(
 
 export const updateEducationInfo = createAsyncThunk(
   'profile/updateEducationInfo',
-  async (educationData:ProfileState, { rejectWithValue }) => {
+  async (educationData:AcademicInfo[], { rejectWithValue }) => {
     try {
       const response = await profileApi.submitEducationInfo(educationData)
       return { educationInfo: educationData, response }
@@ -89,8 +89,8 @@ const profileSlice = createSlice({
         }
         
         // Handle education info
-        if (data.educationInfo || data.education) {
-          state.academicInformations = data.educationInfo || data.education || []
+        if (data.academicInformations || data.education) {
+          state.academicInformations = data.academicInformations || data.education || []
         }
         
         // Handle professional info
@@ -124,7 +124,7 @@ const profileSlice = createSlice({
       })
       .addCase(updateEducationInfo.fulfilled, (state, action) => {
         state.loading = false
-        state.academicInformations = action.payload.educationInfo.academicInformations
+        state.academicInformations = action.payload.educationInfo
       })
       .addCase(updateEducationInfo.rejected, (state, action) => {
         state.loading = false

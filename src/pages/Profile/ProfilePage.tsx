@@ -2,15 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { fetchProfile, updatePersonalInfo, updateEducationInfo, clearError } from '../../store/slices/profileSlice';
+import { AcademicInfo } from '../../types/profile';
 
-interface EducationEntry {
-  id: string;
-  nameOfDegree: string;
-  boardOfEducation: string;
-  institution: string;
-  academicYear: string;
-  result: string;
-}
 
 interface FormErrors {
   [key: string]: string;
@@ -18,7 +11,7 @@ interface FormErrors {
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { profile, loading, error } = useAppSelector((state) => state.profile);
+  const { personalInfo,academicInformations,loading, error } = useAppSelector((state) => state.profile);
 
   const [activeTab, setActiveTab] = useState<'basic' | 'education'>('basic');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -45,7 +38,7 @@ const ProfilePage: React.FC = () => {
   });
 
   // Education State
-  const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([
+  const [educationEntries, setEducationEntries] = useState<AcademicInfo[]>([
     { id: "1", nameOfDegree: "SSC", boardOfEducation: "", institution: "", academicYear: "", result: "" },
     { id: "2", nameOfDegree: "HSC", boardOfEducation: "", institution: "", academicYear: "", result: "" },
     { id: "3", nameOfDegree: "Honours", boardOfEducation: "", institution: "", academicYear: "", result: "" },
@@ -66,36 +59,36 @@ const ProfilePage: React.FC = () => {
 
   // Load profile data on component mount
   useEffect(() => {
-    if (!profile) {
+    if (!personalInfo) {
       dispatch(fetchProfile());
     }
-  }, [dispatch, profile]);
+  }, [dispatch, personalInfo]);
 
   // Populate form fields when profile data is loaded
   useEffect(() => {
-    if (profile) {
+    if (personalInfo) {
       setBasicInfo({
-        fullName: profile.fullName || '',
-        studentId: profile.studentId || '',
-        isIubian: profile.isIubian ? 'yes' : 'no',
-        departmentName: profile.departmentName || '',
-        dateOfBirth: formatDateForInput(profile.dateOfBirth),
-        fatherFirstName: profile.fatherFirstName || '',
-        fatherLastName: profile.fatherLastName || '',
-        motherFirstName: profile.motherFirstName || '',
-        motherLastName: profile.motherLastName || '',
-        nationality: profile.nationality || '',
-        presentAddress: profile.presentAddress || '',
-        permanentAddress: profile.permanentAddress || '',
-        email: profile.email || '',
-        phoneNumber: profile.phoneNumber || '',
-        contactNumber: profile.contactNumber || '',
-        emergencyContactNumber: profile.emergencyContactNumber || ''
+        fullName: personalInfo.fullName || '',
+        studentId: personalInfo.studentId || '',
+        isIubian: personalInfo.isIubian ? 'yes' : 'no',
+        departmentName: personalInfo.departmentName || '',
+        dateOfBirth: formatDateForInput(personalInfo.dateOfBirth),
+        fatherFirstName: personalInfo.fatherFirstName || '',
+        fatherLastName: personalInfo.fatherLastName || '',
+        motherFirstName: personalInfo.motherFirstName || '',
+        motherLastName: personalInfo.motherLastName || '',
+        nationality: personalInfo.nationality || '',
+        presentAddress: personalInfo.presentAddress || '',
+        permanentAddress: personalInfo.permanentAddress || '',
+        email: personalInfo.email || '',
+        phoneNumber: personalInfo.phoneNumber || '',
+        contactNumber: personalInfo.contactNumber || '',
+        emergencyContactNumber: personalInfo.emergencyContactNumber || ''
       });
 
       // Handle education data
-      if (profile.academicInformations && profile.academicInformations.length > 0) {
-        const transformedEducation = profile.academicInformations.map((item) => ({
+      if (academicInformations && academicInformations.length > 0) {
+        const transformedEducation = academicInformations.map((item) => ({
           id: item.id?.toString() || Date.now().toString(),
           nameOfDegree: item.nameOfDegree || "",
           boardOfEducation: item.boardOfEducation || "",
@@ -127,7 +120,7 @@ const ProfilePage: React.FC = () => {
         setEducationEntries([...mergedEntries, ...additionalEntries]);
       }
     }
-  }, [profile]);
+  }, [personalInfo,academicInformations]);
 
   // Clear error when component unmounts or when switching tabs
   useEffect(() => {
@@ -167,7 +160,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const addEducationEntry = () => {
-    const newEntry: EducationEntry = {
+    const newEntry: AcademicInfo = {
       id: Date.now().toString(),
       nameOfDegree: '',
       boardOfEducation: '',
@@ -255,12 +248,7 @@ const ProfilePage: React.FC = () => {
           return;
         }
 
-        const educationData = educationEntries.map(entry => ({
-          ...entry,
-          academicYear: parseInt(entry.academicYear)
-        }));
-
-        await dispatch(updateEducationInfo(educationData)).unwrap();
+        await dispatch(updateEducationInfo(educationEntries)).unwrap();
         setMessage({ type: 'success', text: 'Education updated successfully!' });
       }
     } catch (error: any) {
