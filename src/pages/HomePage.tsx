@@ -177,11 +177,6 @@ const HomePage: React.FC = () => {
                           <span className="text-gray-600 text-sm ml-1">
                             BDT
                           </span>
-                          {program.discoutPC > 0 && (
-                            <div className="text-sm text-green-600 font-medium">
-                              {program.discoutPC}% discount available
-                            </div>
-                          )}
                         </div>
 
                         <div className="text-right">
