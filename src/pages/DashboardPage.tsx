@@ -331,8 +331,11 @@ const DashboardPage: React.FC = () => {
                           </button>
                         )}
                         
-                        {billingItem.isSuccessfullyEPRegistration ? (
-                          <span className="text-xs text-green-600">Registration Complete</span>
+                        {billingItem.isBillPaid ? (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            All processes completed
+                          </span>
                         ) : (
                           <div className="flex items-center space-x-1 text-amber-600 text-xs">
                             <AlertCircle className="w-3 h-3" />

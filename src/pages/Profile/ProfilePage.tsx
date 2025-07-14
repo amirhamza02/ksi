@@ -142,7 +142,6 @@ const ProfilePage: React.FC = () => {
 
   // Update occupation info when occupation data is loaded from store
   useEffect(() => {
-    console.log("Occupation data: ", occupation);
     if (occupation) {
       setOccupationInfo({
         profession: occupation.profession || "",
