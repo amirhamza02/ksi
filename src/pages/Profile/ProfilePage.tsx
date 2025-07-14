@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { useAppSelector } from '../../hooks/useAppSelector';
-import { fetchProfile, updatePersonalInfo, updateEducationInfo, clearError } from '../../store/slices/profileSlice';
-import { AcademicInfo } from '../../types/profile';
-
-
-interface FormErrors {
-  [key: string]: string;
-}
+import React, { useState, useEffect } from "react";
+import Header from "../../components/Header";
+import { Save, User, GraduationCap, Plus, Trash2 } from "lucide-react";
+import { AcademicInfo, ProfileState } from "../../types/profile";
+import { useAuth } from "../../contexts/AuthContext";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { 
+  fetchProfile, 
+  updatePersonalInfo, 
+  updateEducationInfo, 
+  clearError 
+} from "../../store/slices/profileSlice";
 
 const ProfilePage: React.FC = () => {
+  const { user } = useAuth();
   const dispatch = useAppDispatch();
-<<<<<<< HEAD
   const { 
     personalInfo, 
     occupation,
@@ -25,123 +28,120 @@ const ProfilePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-=======
-  const { personalInfo,academicInformations,loading, error } = useAppSelector((state) => state.profile);
->>>>>>> 91f9a2f732aa406a80ab31c3d141144fea4fa60e
 
-  const [activeTab, setActiveTab] = useState<'basic' | 'education'>('basic');
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  // Basic Information State
   const [basicInfo, setBasicInfo] = useState({
-    fullName: '',
-    studentId: '',
-    isIubian: '',
-    departmentName: '',
-    dateOfBirth: '',
-    fatherFirstName: '',
-    fatherLastName: '',
-    motherFirstName: '',
-    motherLastName: '',
-    nationality: '',
-    presentAddress: '',
-    permanentAddress: '',
-    email: '',
-    phoneNumber: '',
-    contactNumber: '',
-    emergencyContactNumber: ''
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    isIubian: "",
+    studentId: "",
+    departmentName: "",
+    dateOfBirth: "",
+    nationality: "",
+    contactNumber: user?.phone || "",
+    emergencyContactNumber: "",
+    fatherFirstName: "",
+    fatherLastName: "",
+    motherFirstName: "",
+    motherLastName: "",
+    presentAddress: "",
+    permanentAddress: "",
   });
 
-  // Education State
   const [educationEntries, setEducationEntries] = useState<AcademicInfo[]>([
-    { id: "1", nameOfDegree: "SSC", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-    { id: "2", nameOfDegree: "HSC", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-    { id: "3", nameOfDegree: "Honours", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-    { id: "4", nameOfDegree: "Masters", boardOfEducation: "", institution: "", academicYear: "", result: "" },
+    {
+      id: "1",
+      nameOfDegree: "SSC",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: '',
+      result: "",
+    },
+    {
+      id: "2",
+      nameOfDegree: "HSC",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: '',
+      result: "",
+    },
+    {
+      id: "3",
+      nameOfDegree: "Honours",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: '',
+      result: "",
+    },
+    {
+      id: "4",
+      nameOfDegree: "Masters",
+      boardOfEducation: "",
+      institution: "",
+      academicYear: '',
+      result: "",
+    },
   ]);
 
-  // Helper function to format date for input
-  const formatDateForInput = (dateString: string | null | undefined): string => {
-    if (!dateString) return '';
-    try {
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0];
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return '';
-    }
-  };
+  const [occupationInfo, setOccupationInfo] = useState({
+    profession: "",
+    institute: "",
+    department: "",
+  });
 
   // Load profile data on component mount
   useEffect(() => {
-    if (!personalInfo) {
+    if (user?.id && !isLoaded) {
       dispatch(fetchProfile());
     }
-  }, [dispatch, personalInfo]);
+  }, [user?.id, isLoaded, dispatch]);
 
-  // Populate form fields when profile data is loaded
+  // Update form fields when profile data is loaded from store
   useEffect(() => {
     if (personalInfo) {
+      // Helper function to format date from API response
+      const formatDateForInput = (dateString: string | null | undefined): string => {
+        if (!dateString) return '';
+        try {
+          // Extract just the date part from ISO string (YYYY-MM-DDTHH:mm:ss -> YYYY-MM-DD)
+          const date = new Date(dateString);
+          return date.toISOString().split('T')[0];
+        } catch (error) {
+          console.error('Error formatting date:', error);
+          return '';
+        }
+      };
+
       setBasicInfo({
-        fullName: personalInfo.fullName || '',
-        studentId: personalInfo.studentId || '',
-        isIubian: personalInfo.isIubian ? 'yes' : 'no',
-        departmentName: personalInfo.departmentName || '',
+        firstName: personalInfo.firstName || user?.firstName || "",
+        lastName: personalInfo.lastName || user?.lastName || "",
+        email: personalInfo.email || user?.email || "",
+        isIubian: personalInfo.isIubian ? "yes" : "no",
+        studentId: personalInfo.studentId || "",
+        departmentName: personalInfo.departmentName || "",
         dateOfBirth: formatDateForInput(personalInfo.dateOfBirth),
-        fatherFirstName: personalInfo.fatherFirstName || '',
-        fatherLastName: personalInfo.fatherLastName || '',
-        motherFirstName: personalInfo.motherFirstName || '',
-        motherLastName: personalInfo.motherLastName || '',
-        nationality: personalInfo.nationality || '',
-        presentAddress: personalInfo.presentAddress || '',
-        permanentAddress: personalInfo.permanentAddress || '',
-        email: personalInfo.email || '',
-        phoneNumber: personalInfo.phoneNumber || '',
-        contactNumber: personalInfo.contactNumber || '',
-        emergencyContactNumber: personalInfo.emergencyContactNumber || ''
+        nationality: personalInfo.nationality || "",
+        contactNumber:  personalInfo?.contactNumber || "",
+        emergencyContactNumber: personalInfo.emergencyContactNumber || "",
+        fatherFirstName: personalInfo.fatherFirstName || "",
+        fatherLastName: personalInfo.fatherLastName || "",
+        motherFirstName: personalInfo.motherFirstName || "",
+        motherLastName: personalInfo.motherLastName || "",
+        presentAddress: personalInfo.presentAddress || "",
+        permanentAddress: personalInfo.permanentAddress || "",
       });
-
-      // Handle education data
-      if (academicInformations && academicInformations.length > 0) {
-        const transformedEducation = academicInformations.map((item) => ({
-          id: item.id?.toString() || Date.now().toString(),
-          nameOfDegree: item.nameOfDegree || "",
-          boardOfEducation: item.boardOfEducation || "",
-          institution: item.institution || "",
-          academicYear: item.academicYear?.toString() || "",
-          result: item.result || "",
-        }));
-        
-        const defaultEntries = [
-          { id: "1", nameOfDegree: "SSC", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-          { id: "2", nameOfDegree: "HSC", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-          { id: "3", nameOfDegree: "Honours", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-          { id: "4", nameOfDegree: "Masters", boardOfEducation: "", institution: "", academicYear: "", result: "" },
-        ];
-        
-        const mergedEntries = defaultEntries.map(defaultEntry => {
-          const apiEntry = transformedEducation.find(item => 
-            item.nameOfDegree.toLowerCase() === defaultEntry.nameOfDegree.toLowerCase()
-          );
-          return apiEntry || defaultEntry;
-        });
-        
-        const additionalEntries = transformedEducation.filter(item => 
-          !defaultEntries.some(defaultEntry => 
-            defaultEntry.nameOfDegree.toLowerCase() === item.nameOfDegree.toLowerCase()
-          )
-        );
-        
-        setEducationEntries([...mergedEntries, ...additionalEntries]);
-      }
     }
-  }, [personalInfo,academicInformations]);
+  }, [personalInfo, user]);
 
-<<<<<<< HEAD
+  // Update education entries when education data is loaded from store
+  useEffect(() => {
+    if (academicInformations && academicInformations.length > 0) {
+      setEducationEntries(academicInformations);
+    }
+  }, [academicInformations]);
+
   // Update occupation info when occupation data is loaded from store
   useEffect(() => {
-    console.log("Occupation data: ", occupation);
     if (occupation) {
       setOccupationInfo({
         profession: occupation.profession || "",
@@ -152,135 +152,217 @@ const ProfilePage: React.FC = () => {
   }, [occupation]);
 
   // Clear profile errors when component unmounts or user changes
-=======
-  // Clear error when component unmounts or when switching tabs
->>>>>>> 91f9a2f732aa406a80ab31c3d141144fea4fa60e
   useEffect(() => {
     return () => {
       dispatch(clearError());
     };
-  }, [dispatch, activeTab]);
+  }, [dispatch]);
 
-  // Clear messages after 5 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-
-  const handleBasicInfoChange = (field: string, value: string) => {
-    setBasicInfo(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+  const handleBasicChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setBasicInfo((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleEducationChange = (id: string, field: string, value: string) => {
-    setEducationEntries(prev =>
-      prev.map(entry =>
+    setEducationEntries((prev) =>
+      prev.map((entry) =>
         entry.id === id ? { ...entry, [field]: value } : entry
       )
     );
-    
-    const errorKey = `${id}_${field}`;
-    if (errors[errorKey]) {
-      setErrors(prev => ({ ...prev, [errorKey]: '' }));
-    }
+  };
+
+  const handleOccupationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setOccupationInfo((prev) => ({ ...prev, [name]: value }));
   };
 
   const addEducationEntry = () => {
     const newEntry: AcademicInfo = {
       id: Date.now().toString(),
-      nameOfDegree: '',
-      boardOfEducation: '',
-      institution: '',
+      nameOfDegree: "",
+      boardOfEducation: "",
+      institution: "",
       academicYear: '',
-      result: ''
+      result: "",
     };
-    setEducationEntries(prev => [...prev, newEntry]);
+    setEducationEntries((prev) => [...prev, newEntry]);
   };
 
   const removeEducationEntry = (id: string) => {
     if (educationEntries.length > 1) {
-      setEducationEntries(prev => prev.filter(entry => entry.id !== id));
+      setEducationEntries((prev) => prev.filter((entry) => entry.id !== id));
     }
   };
 
-  const validateBasicInfo = (): boolean => {
-    const newErrors: FormErrors = {};
-    
-    if (!basicInfo.fullName.trim()) newErrors.fullName = 'Full name is required';
-    if (!basicInfo.studentId.trim()) newErrors.studentId = 'Student ID is required';
-    if (!basicInfo.isIubian) newErrors.isIubian = 'Please select if you are an IUBian';
-    if (!basicInfo.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-    if (!basicInfo.fatherFirstName.trim()) newErrors.fatherFirstName = 'Father\'s first name is required';
-    if (!basicInfo.fatherLastName.trim()) newErrors.fatherLastName = 'Father\'s last name is required';
-    if (!basicInfo.motherFirstName.trim()) newErrors.motherFirstName = 'Mother\'s first name is required';
-    if (!basicInfo.motherLastName.trim()) newErrors.motherLastName = 'Mother\'s last name is required';
-    if (!basicInfo.nationality.trim()) newErrors.nationality = 'Nationality is required';
-    if (!basicInfo.presentAddress.trim()) newErrors.presentAddress = 'Present address is required';
-    if (!basicInfo.permanentAddress.trim()) newErrors.permanentAddress = 'Permanent address is required';
-    if (!basicInfo.email.trim()) newErrors.email = 'Email is required';
-    if (!basicInfo.contactNumber.trim()) newErrors.contactNumber = 'Contact number is required';
-    if (!basicInfo.emergencyContactNumber.trim()) newErrors.emergencyContactNumber = 'Emergency contact number is required';
+  const validateBasicInfo = () => {
+    const newErrors: Record<string, string> = {};
 
-    setErrors(newErrors);
+    if (!basicInfo.firstName?.trim()) {
+      newErrors.firstName = "First Name is required";
+    }
+    if (!basicInfo.lastName?.trim()) {
+      newErrors.lastName = "Last Name is required";
+    }
+    if (!basicInfo.dateOfBirth?.trim()) {
+      newErrors.dateOfBirth = "Date of Birth is required";
+    }
+    if (!basicInfo.fatherFirstName?.trim()) {
+      newErrors.fatherFirstName = "Father's first name is required";
+    }
+    if (!basicInfo.fatherLastName?.trim()) {
+      newErrors.fatherLastName = "Father's last name is required";
+    }
+    if (!basicInfo.motherFirstName?.trim()) {
+      newErrors.motherFirstName = "Mother's first name is required";
+    }
+    if (!basicInfo.motherLastName?.trim()) {
+      newErrors.motherLastName = "Mother's last name is required";
+    }
+    if (!basicInfo.nationality?.trim()) {
+      newErrors.nationality = "Nationality is required";
+    }
+    if (!basicInfo.contactNumber?.trim()) {
+      newErrors.contactNumber = "Contact Number is required";
+    }
+    if (!basicInfo.emergencyContactNumber?.trim()) {
+      newErrors.emergencyContact = "Emergency Contact is required";
+    }
+
+    // IUB student validation
+    if (basicInfo.isIubian === "yes") {
+      if (!basicInfo.studentId?.trim()) {
+        newErrors.studentId = "Student ID is required for IUB students";
+      }
+      if (!basicInfo.departmentName?.trim()) {
+        newErrors.departmentName = "Department is required for IUB students";
+      }
+    }
+
+    // Always set errors, even if empty
+    setErrors((prev) => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateEducation = (): boolean => {
-    const newErrors: FormErrors = {};
-    
-    educationEntries.forEach(entry => {
-      if (!entry.nameOfDegree.trim()) {
-        newErrors[`${entry.id}_nameOfDegree`] = 'Degree name is required';
-      }
-      if (!entry.boardOfEducation.trim()) {
-        newErrors[`${entry.id}_boardOfEducation`] = 'Board/University is required';
-      }
-      if (!entry.institution.trim()) {
-        newErrors[`${entry.id}_institution`] = 'Institution is required';
-      }
-      if (!entry.academicYear.trim()) {
-        newErrors[`${entry.id}_academicYear`] = 'Academic year is required';
-      }
-      if (!entry.result.trim()) {
-        newErrors[`${entry.id}_result`] = 'Result is required';
+  const validateAcademicInfo = () => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
+    // At least one education entry must be filled (any field)
+    const hasAnyEducation = educationEntries.some(
+      (entry) =>
+        entry.boardOfEducation.trim() ||
+        entry.institution.trim() ||
+        entry.academicYear.trim() ||
+        entry.result.trim()
+    );
+
+    if (!hasAnyEducation) {
+      newErrors.general = "Please provide at least one education entry.";
+      isValid = false;
+    }
+
+    educationEntries.forEach((entry, index) => {
+      // If any of the fields are filled, all must be filled
+      const anyFieldFilled =
+        entry.boardOfEducation.trim() ||
+        entry.institution.trim() ||
+        entry.academicYear.trim() ||
+        entry.result.trim();
+
+      if (anyFieldFilled) {
+        if (!entry.nameOfDegree) {
+          newErrors[`degreeName_${index}`] = "Degree Name is required";
+          isValid = false;
+        }
+        if (!entry.boardOfEducation.trim()) {
+          newErrors[`board_${index}`] = "Board/University is required";
+          isValid = false;
+        }
+        if (!entry.institution.trim()) {
+          newErrors[`institution_${index}`] = "Institution is required";
+          isValid = false;
+        }
+        if (!entry.result.trim()) {
+          newErrors[`result_${index}`] = "Result is required";
+          isValid = false;
+        }
       }
     });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return isValid;
   };
 
   const handleSave = async () => {
-    setMessage(null);
+    // Clear previous errors first
     setErrors({});
+    dispatch(clearError());
+
+    setIsLoading(true);
 
     try {
-      if (activeTab === 'basic') {
+      if (activeTab === "basic") {
+        // Validate and save basic information
         if (!validateBasicInfo()) {
-          setMessage({ type: 'error', text: 'Please fill in all required fields in Basic Information.' });
+          setErrors((prev) => ({
+            ...prev,
+            general:
+              "Please fill in all required fields in the Basic Information section before saving.",
+          }));
           return;
         }
-
+        
         const personalInfoData = {
-          ...basicInfo,
-          isIubian: basicInfo.isIubian === 'yes'
+          firstName: basicInfo.firstName,
+          lastName: basicInfo.lastName,
+          email: basicInfo.email,
+          isIubian: basicInfo.isIubian === "yes",
+          studentId: basicInfo.studentId,
+          departmentName: basicInfo.departmentName,
+          dateOfBirth: basicInfo.dateOfBirth,
+          nationality: basicInfo.nationality,
+          contactNumber: basicInfo.contactNumber,
+          emergencyContactNumber: basicInfo.emergencyContactNumber,
+          fatherFirstName: basicInfo.fatherFirstName,
+          fatherLastName: basicInfo.fatherLastName,
+          motherFirstName: basicInfo.motherFirstName,
+          motherLastName: basicInfo.motherLastName,
+          presentAddress: basicInfo.presentAddress,
+          permanentAddress: basicInfo.permanentAddress,
         };
-
+        
         await dispatch(updatePersonalInfo(personalInfoData)).unwrap();
-        setMessage({ type: 'success', text: 'Basic Information updated successfully!' });
-      } else if (activeTab === 'education') {
-        if (!validateEducation()) {
-          setMessage({ type: 'error', text: 'Please fill in all required fields in Education.' });
+      } else if (activeTab === "education") {
+        // Validate and save education information
+        if (!validateAcademicInfo()) {
+          setErrors((prev) => ({
+            ...prev,
+            general:
+              "Please fill in at least one Education section before saving.",
+          }));
           return;
         }
+        
+        const educationData = educationEntries
+          .filter(entry => entry.institution && entry.academicYear && entry.result)
+          .map((entry) => ({
+            id: entry.id,
+            userId: typeof user?.id === "number" ? user.id : 0,
+            nameOfDegree: entry.nameOfDegree,
+            boardOfEducation: entry.boardOfEducation,
+            institution: entry.institution,
+            academicYear: entry.academicYear,
+            result: entry.result,
+          }));
 
-<<<<<<< HEAD
           const occupationData = {
             profession: occupationInfo.profession,
             institute: occupationInfo.institute,
@@ -322,455 +404,520 @@ const ProfilePage: React.FC = () => {
       setErrors({
         general:
           error instanceof Error ? error.message : "Failed to save profile",
-=======
-        await dispatch(updateEducationInfo(educationEntries)).unwrap();
-        setMessage({ type: 'success', text: 'Education updated successfully!' });
-      }
-    } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: error.message || 'An error occurred while saving. Please try again.' 
->>>>>>> 91f9a2f732aa406a80ab31c3d141144fea4fa60e
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+  const tabs = [
+    { id: "basic", label: "Basic Information", icon: User },
+    { id: "education", label: "Education", icon: GraduationCap },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-            <h1 className="text-2xl font-bold text-white">Profile Information</h1>
-            <p className="text-blue-100 mt-1">Manage your personal and academic information</p>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-primary">
+            Complete Your Profile
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Please fill out all sections to complete your admission process. IUB
+            students are eligible for special discounts!
+          </p>
+        </div>
+
+        {/* Common message area */}
+        {successMessage && (
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            {successMessage}
           </div>
+        )}
 
-          {/* Messages */}
-          {(message || error) && (
-            <div className="px-6 py-4 border-b border-gray-200">
-              {message && (
-                <div className={`p-4 rounded-md ${
-                  message.type === 'success' 
-                    ? 'bg-green-50 border border-green-200 text-green-800' 
-                    : 'bg-red-50 border border-red-200 text-red-800'
-                }`}>
-                  {message.text}
-                </div>
-              )}
-              {error && !message && (
-                <div className="p-4 rounded-md bg-red-50 border border-red-200 text-red-800">
-                  {error}
-                </div>
-              )}
-            </div>
-          )}
+        {(errors.general || profileError) && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+            {errors.general || profileError}
+          </div>
+        )}
+        
+        {/* Loading indicator for profile data */}
+        {profileLoading && !isLoaded && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            Loading profile data...
+          </div>
+        )}
 
-          {/* Tabs */}
+        <div className="bg-white rounded-lg card-shadow">
+          {/* Tab Navigation */}
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
-              <button
-                onClick={() => setActiveTab('basic')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                  activeTab === 'basic'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Basic Information
-              </button>
-              <button
-                onClick={() => setActiveTab('education')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                  activeTab === 'education'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Education
-              </button>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
+                    activeTab === tab.id
+                      ? "border-[#00c0ef] text-[#00c0ef]"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
             </nav>
           </div>
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'basic' && (
+            {activeTab === "basic" && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Basic Information
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
+                    <label className="form-label">
+                      First Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={basicInfo.fullName}
-                      onChange={(e) => handleBasicInfoChange('fullName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.fullName ? 'border-red-300' : 'border-gray-300'
+                      name="firstName"
+                      value={basicInfo.firstName}
+                      onChange={handleBasicChange}
+                      className={`input-field ${
+                        errors.firstName ? "border-red-500" : ""
                       }`}
-                      placeholder="Enter your full name"
+                      placeholder="Enter first name"
                     />
-                    {errors.fullName && <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>}
+                    {errors.firstName && (
+                      <p className="error-text">{errors.firstName}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Student ID *
+                    <label className="form-label">
+                      Last Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={basicInfo.studentId}
-                      onChange={(e) => handleBasicInfoChange('studentId', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.studentId ? 'border-red-300' : 'border-gray-300'
+                      name="lastName"
+                      value={basicInfo.lastName}
+                      onChange={handleBasicChange}
+                      className={`input-field ${
+                        errors.lastName ? "border-red-500" : ""
                       }`}
-                      placeholder="Enter your student ID"
+                      placeholder="Enter last name"
                     />
-                    {errors.studentId && <p className="mt-1 text-sm text-red-600">{errors.studentId}</p>}
+                    {errors.lastName && (
+                      <p className="error-text">{errors.lastName}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Are you an IUBian? *
-                    </label>
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={basicInfo.email}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      placeholder="Enter email"
+                      disabled
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Are you an IUBian?</label>
                     <select
+                      name="isIubian"
                       value={basicInfo.isIubian}
-                      onChange={(e) => handleBasicInfoChange('isIubian', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.isIubian ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      onChange={handleBasicChange}
+                      className="input-field"
                     >
-                      <option value="">Select an option</option>
+                      <option value="">Select option</option>
                       <option value="yes">Yes</option>
                       <option value="no">No</option>
                     </select>
-                    {errors.isIubian && <p className="mt-1 text-sm text-red-600">{errors.isIubian}</p>}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Department Name
-                    </label>
-                    <input
-                      type="text"
-                      value={basicInfo.departmentName}
-                      onChange={(e) => handleBasicInfoChange('departmentName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter your department"
-                    />
-                  </div>
+                  {basicInfo.isIubian === "yes" && (
+                    <>
+                      <div>
+                        <label className="form-label">
+                          Student ID <span className="text-red-500">*</span>{" "}
+                          <span className="text-sm text-gray-500">
+                            (Applicable for only IUB student)
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          name="studentId"
+                          value={basicInfo.studentId}
+                          onChange={handleBasicChange}
+                          className={`input-field ${
+                            errors.studentId ? "border-red-500" : ""
+                          }`}
+                          placeholder="Enter student ID"
+                        />
+                        {errors.studentId && (
+                          <p className="error-text">{errors.studentId}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="form-label">
+                          Department <span className="text-red-500">*</span>{" "}
+                          <span className="text-sm text-gray-500">
+                            (Applicable for only IUB student)
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          name="departmentName"
+                          value={basicInfo.departmentName}
+                          onChange={handleBasicChange}
+                          className={`input-field ${
+                            errors.department ? "border-red-500" : ""
+                          }`}
+                          placeholder="Enter department"
+                        />
+                        {errors.department && (
+                          <p className="error-text">{errors.departmentName}</p>
+                        )}
+                      </div>
+                    </>
+                  )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date of Birth *
+                    <label className="form-label">
+                      Date of Birth <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
+                      name="dateOfBirth"
+                      placeholder="DD-MM-YYYY"
                       value={basicInfo.dateOfBirth}
-                      onChange={(e) => handleBasicInfoChange('dateOfBirth', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.dateOfBirth ? 'border-red-300' : 'border-gray-300'
+                      onChange={handleBasicChange}
+                      className={`input-field ${
+                        errors.dateOfBirth ? "border-red-500" : ""
                       }`}
                     />
-                    {errors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth}</p>}
+                    {errors.dateOfBirth && (
+                      <p className="error-text">{errors.dateOfBirth}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Father's First Name *
+                    <label className="form-label">
+                      Nationality <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={basicInfo.fatherFirstName}
-                      onChange={(e) => handleBasicInfoChange('fatherFirstName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.fatherFirstName ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter father's first name"
-                    />
-                    {errors.fatherFirstName && <p className="mt-1 text-sm text-red-600">{errors.fatherFirstName}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Father's Last Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={basicInfo.fatherLastName}
-                      onChange={(e) => handleBasicInfoChange('fatherLastName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.fatherLastName ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter father's last name"
-                    />
-                    {errors.fatherLastName && <p className="mt-1 text-sm text-red-600">{errors.fatherLastName}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mother's First Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={basicInfo.motherFirstName}
-                      onChange={(e) => handleBasicInfoChange('motherFirstName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.motherFirstName ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter mother's first name"
-                    />
-                    {errors.motherFirstName && <p className="mt-1 text-sm text-red-600">{errors.motherFirstName}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mother's Last Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={basicInfo.motherLastName}
-                      onChange={(e) => handleBasicInfoChange('motherLastName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.motherLastName ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter mother's last name"
-                    />
-                    {errors.motherLastName && <p className="mt-1 text-sm text-red-600">{errors.motherLastName}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nationality *
-                    </label>
-                    <input
-                      type="text"
+                      name="nationality"
                       value={basicInfo.nationality}
-                      onChange={(e) => handleBasicInfoChange('nationality', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.nationality ? 'border-red-300' : 'border-gray-300'
+                      onChange={handleBasicChange}
+                      className={`input-field ${
+                        errors.nationality ? "border-red-500" : ""
                       }`}
-                      placeholder="Enter your nationality"
+                      placeholder="Enter nationality"
                     />
-                    {errors.nationality && <p className="mt-1 text-sm text-red-600">{errors.nationality}</p>}
+                    {errors.nationality && (
+                      <p className="error-text">{errors.nationality}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Present Address *
-                    </label>
-                    <textarea
-                      value={basicInfo.presentAddress}
-                      onChange={(e) => handleBasicInfoChange('presentAddress', e.target.value)}
-                      rows={3}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.presentAddress ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter your present address"
-                    />
-                    {errors.presentAddress && <p className="mt-1 text-sm text-red-600">{errors.presentAddress}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Permanent Address *
-                    </label>
-                    <textarea
-                      value={basicInfo.permanentAddress}
-                      onChange={(e) => handleBasicInfoChange('permanentAddress', e.target.value)}
-                      rows={3}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.permanentAddress ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter your permanent address"
-                    />
-                    {errors.permanentAddress && <p className="mt-1 text-sm text-red-600">{errors.permanentAddress}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={basicInfo.email}
-                      onChange={(e) => handleBasicInfoChange('email', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.email ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter your email"
-                    />
-                    {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
+                    <label className="form-label">
+                      Contact Number <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
-                      value={basicInfo.phoneNumber}
-                      onChange={(e) => handleBasicInfoChange('phoneNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Contact Number *
-                    </label>
-                    <input
-                      type="tel"
+                      name="contactNumber"
                       value={basicInfo.contactNumber}
-                      onChange={(e) => handleBasicInfoChange('contactNumber', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.contactNumber ? 'border-red-300' : 'border-gray-300'
+                      onChange={handleBasicChange}
+                      className={`input-field ${
+                        errors.contactNumber ? "border-red-500" : ""
                       }`}
-                      placeholder="Enter your contact number"
+                      placeholder="Enter contact number"
                     />
-                    {errors.contactNumber && <p className="mt-1 text-sm text-red-600">{errors.contactNumber}</p>}
+                    {errors.contactNumber && (
+                      <p className="error-text">{errors.contactNumber}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Emergency Contact Number *
+                    <label className="form-label">
+                      Emergency Contact <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="tel"
+                      type="text"
+                      name="emergencyContactNumber"
                       value={basicInfo.emergencyContactNumber}
-                      onChange={(e) => handleBasicInfoChange('emergencyContactNumber', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.emergencyContactNumber ? 'border-red-300' : 'border-gray-300'
+                      onChange={handleBasicChange}
+                      className={`input-field ${
+                        errors.emergencyContactNumber ? "border-red-500" : ""
                       }`}
-                      placeholder="Enter emergency contact number"
+                      placeholder="Enter emergency contact"
                     />
-                    {errors.emergencyContactNumber && <p className="mt-1 text-sm text-red-600">{errors.emergencyContactNumber}</p>}
+                    {errors.emergencyContactNumber && (
+                      <p className="error-text">{errors.emergencyContactNumber}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Father's Name - Same Line */}
+                <div>
+                  <label className="form-label">
+                    Father's Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <input
+                        type="text"
+                        name="fatherFirstName"
+                        value={basicInfo.fatherFirstName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${
+                          errors.fatherFirstName ? "border-red-500" : ""
+                        }`}
+                        placeholder="First name"
+                      />
+                      {errors.fatherFirstName && (
+                        <p className="error-text">{errors.fatherFirstName}</p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        name="fatherLastName"
+                        value={basicInfo.fatherLastName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${
+                          errors.fatherLastName ? "border-red-500" : ""
+                        }`}
+                        placeholder="Last name"
+                      />
+                      {errors.fatherLastName && (
+                        <p className="error-text">{errors.fatherLastName}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mother's Name - Same Line */}
+                <div>
+                  <label className="form-label">
+                    Mother's Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <input
+                        type="text"
+                        name="motherFirstName"
+                        value={basicInfo.motherFirstName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${
+                          errors.motherFirstName ? "border-red-500" : ""
+                        }`}
+                        placeholder="First name"
+                      />
+                      {errors.motherFirstName && (
+                        <p className="error-text">{errors.motherFirstName}</p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        name="motherLastName"
+                        value={basicInfo.motherLastName}
+                        onChange={handleBasicChange}
+                        className={`input-field ${
+                          errors.motherLastName ? "border-red-500" : ""
+                        }`}
+                        placeholder="Last name"
+                      />
+                      {errors.motherLastName && (
+                        <p className="error-text">{errors.motherLastName}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="form-label">Present Address</label>
+                    <textarea
+                      name="presentAddress"
+                      value={basicInfo.presentAddress}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      rows={3}
+                      placeholder="Enter present address"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Permanent Address</label>
+                    <textarea
+                      name="permanentAddress"
+                      value={basicInfo.permanentAddress}
+                      onChange={handleBasicChange}
+                      className="input-field"
+                      rows={3}
+                      placeholder="Enter permanent address"
+                    />
                   </div>
                 </div>
               </div>
             )}
 
-            {activeTab === 'education' && (
+            {activeTab === "education" && (
               <div className="space-y-6">
-                {educationEntries.map((entry, index) => (
-                  <div key={entry.id} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Education Entry {index + 1}
-                      </h3>
-                      {educationEntries.length > 1 && (
-                        <button
-                          onClick={() => removeEducationEntry(entry.id)}
-                          className="text-red-600 hover:text-red-800 font-medium"
-                        >
-                          Remove
-                        </button>
-                      )}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Education
+                  </h3>
+                </div>
+
+                <div className="space-y-6">
+                  {educationEntries.map((entry, index) => (
+                    <div
+                      key={entry.id}
+                      className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-medium text-gray-800">
+                          Education Entry {index + 1}
+                        </h4>
+                        {educationEntries.length > 1 && (
+                          <button
+                            onClick={() => removeEducationEntry(entry.id)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                            title="Remove entry"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="form-label">Name of Degree</label>
+                          <select
+                            value={entry.nameOfDegree}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "nameOfDegree",
+                                e.target.value
+                              )
+                            }
+                            className={`input-field ${
+                              errors[`degreeName_${index}`] ? "border-red-500" : ""
+                            }`}
+                          >
+                            <option value="">Select degree</option>
+                            <option value="SSC">SSC</option>
+                            <option value="HSC">HSC</option>
+                            <option value="Honours">Honours</option>
+                            <option value="Masters">Masters</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          {errors[`degreeName_${index}`] && (
+                            <p className="error-text">{errors[`degreeName_${index}`]}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="form-label">Board</label>
+                          <input
+                            type="text"
+                            value={entry.boardOfEducation}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "boardOfEducation",
+                                e.target.value
+                              )
+                            }
+                            className={`input-field ${
+                              errors[`board_${index}`] ? "border-red-500" : ""
+                            }`}
+                            placeholder="Enter board/university"
+                          />
+                          {errors[`board_${index}`] && (
+                            <p className="error-text">{errors[`board_${index}`]}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="form-label">Institution</label>
+                          <input
+                            type="text"
+                            value={entry.institution}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "institution",
+                                e.target.value
+                              )
+                            }
+                            className={`input-field ${
+                              errors[`institution_${index}`] ? "border-red-500" : ""
+                            }`}
+                            placeholder="Enter institution name"
+                          />
+                          {errors[`institution_${index}`] && (
+                            <p className="error-text">{errors[`institution_${index}`]}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="form-label">Academic Year</label>
+                          <input
+                            type="text"
+                            value={entry.academicYear}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "academicYear",
+                                e.target.value
+                              )
+                            }
+                            className="input-field"
+                            placeholder="e.g., 2020-2024"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="form-label">Result</label>
+                          <input
+                            type="text"
+                            value={entry.result}
+                            onChange={(e) =>
+                              handleEducationChange(
+                                entry.id,
+                                "result",
+                                e.target.value
+                              )
+                            }
+                            className={`input-field ${
+                              errors[`result_${index}`] ? "border-red-500" : ""
+                            }`}
+                            placeholder="Enter CGPA/GPA/Grade"
+                          />
+                          {errors[`result_${index}`] && (
+                            <p className="error-text">{errors[`result_${index}`]}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Name of Degree *
-                        </label>
-                        <input
-                          type="text"
-                          value={entry.nameOfDegree}
-                          onChange={(e) => handleEducationChange(entry.id, 'nameOfDegree', e.target.value)}
-                          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            errors[`${entry.id}_nameOfDegree`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                          placeholder="e.g., SSC, HSC, Bachelor's"
-                        />
-                        {errors[`${entry.id}_nameOfDegree`] && (
-                          <p className="mt-1 text-sm text-red-600">{errors[`${entry.id}_nameOfDegree`]}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Board/University *
-                        </label>
-                        <input
-                          type="text"
-                          value={entry.boardOfEducation}
-                          onChange={(e) => handleEducationChange(entry.id, 'boardOfEducation', e.target.value)}
-                          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            errors[`${entry.id}_boardOfEducation`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                          placeholder="e.g., Dhaka Board, University of Dhaka"
-                        />
-                        {errors[`${entry.id}_boardOfEducation`] && (
-                          <p className="mt-1 text-sm text-red-600">{errors[`${entry.id}_boardOfEducation`]}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Institution *
-                        </label>
-                        <input
-                          type="text"
-                          value={entry.institution}
-                          onChange={(e) => handleEducationChange(entry.id, 'institution', e.target.value)}
-                          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            errors[`${entry.id}_institution`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                          placeholder="e.g., ABC High School, XYZ College"
-                        />
-                        {errors[`${entry.id}_institution`] && (
-                          <p className="mt-1 text-sm text-red-600">{errors[`${entry.id}_institution`]}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Academic Year *
-                        </label>
-                        <input
-                          type="text"
-                          value={entry.academicYear}
-                          onChange={(e) => handleEducationChange(entry.id, 'academicYear', e.target.value)}
-                          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            errors[`${entry.id}_academicYear`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                          placeholder="e.g., 2020, 2018-2022"
-                        />
-                        {errors[`${entry.id}_academicYear`] && (
-                          <p className="mt-1 text-sm text-red-600">{errors[`${entry.id}_academicYear`]}</p>
-                        )}
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Result *
-                        </label>
-                        <input
-                          type="text"
-                          value={entry.result}
-                          onChange={(e) => handleEducationChange(entry.id, 'result', e.target.value)}
-                          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            errors[`${entry.id}_result`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                          placeholder="e.g., A+, 3.75/4.00, First Class"
-                        />
-                        {errors[`${entry.id}_result`] && (
-                          <p className="mt-1 text-sm text-red-600">{errors[`${entry.id}_result`]}</p>
-                        )}
-                      </div>
-                    </div>
-<<<<<<< HEAD
                   ))}
 
                   <button
@@ -826,30 +973,19 @@ const ProfilePage: React.FC = () => {
                         placeholder="Enter department"
                       />
                     </div>
-=======
->>>>>>> 91f9a2f732aa406a80ab31c3d141144fea4fa60e
                   </div>
-                ))}
-
-                <button
-                  onClick={addEducationEntry}
-                  className="w-full py-3 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors duration-200"
-                >
-                  + Add Another Education Entry
-                </button>
+                </div>
               </div>
             )}
-          </div>
 
-          {/* Save Button */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-            <div className="flex justify-end">
+            <div className="mt-8 pt-6 border-t border-gray-200">
               <button
                 onClick={handleSave}
-                disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                disabled={isLoading || profileLoading}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                <Save className="w-4 h-4" />
+                <span>{isLoading || profileLoading ? "Saving..." : "Save Profile"}</span>
               </button>
             </div>
           </div>

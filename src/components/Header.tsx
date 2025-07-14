@@ -34,14 +34,14 @@ const Header: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-100 p-1">
                   <img 
-                    src="/iphone_3x_retina_ksj.jpg" 
+                    src="./king-sejong.jpg" 
                     alt="KSI Logo" 
                     className="w-full h-full object-contain rounded"
                   />
                 </div>
                 <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-100 p-1">
                   <img 
-                    src="/iub-logo_2024_color-c303e48f-7406-4c63-8e53-51fb791b2167.png" 
+                    src="./iub-logo.png" 
                     alt="IUB Logo" 
                     className="w-full h-full object-contain"
                   />

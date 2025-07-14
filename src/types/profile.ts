@@ -34,6 +34,7 @@ export interface Occupation {
     userId: number;
     profession?: string;
     institution?: string;
+    institute?: string;
     department?: string;
     fromDate?: string; // ISO date string
     toDate?: string;   // ISO date string
@@ -49,11 +50,7 @@ export interface EducationRequest {
 export interface ProfileState {
     personalInfo: Profile | null;
     academicInformations: AcademicInfo[];
-<<<<<<< HEAD
     occupation: Occupation | null;
-=======
-    professionalInfo: ProfessionalInfo | null;
->>>>>>> 91f9a2f732aa406a80ab31c3d141144fea4fa60e
     loading: boolean;
     error: string | null;
     isLoaded: boolean;

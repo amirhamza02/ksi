@@ -47,14 +47,14 @@ const HomePage: React.FC = () => {
           <div className="flex justify-center items-center space-x-8 mb-8">
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg p-2">
               <img 
-                src="/iphone_3x_retina_ksj.jpg" 
+                src="./king-sejong.jpg" 
                 alt="King Sejong Institute Logo" 
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg p-2">
               <img 
-                src="/iub-logo_2024_color-c303e48f-7406-4c63-8e53-51fb791b2167.png" 
+                 src="./iub-logo.png" 
                 alt="Independent University Bangladesh Logo" 
                 className="w-full h-full object-contain"
               />
