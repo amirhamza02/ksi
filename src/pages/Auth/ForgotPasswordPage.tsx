@@ -130,15 +130,17 @@ const ForgotPasswordPage: React.FC = () => {
             <div>
               <label className="form-label">Email Address</label>
               <div className="relative">
+                <Mail  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+
                 <input
+                  
                   type="email"
                   value={email}
                   onChange={handleEmailChange}
-                  className={`input-field pl-12 ${error ? 'border-red-500' : ''}`}
+                  className={`input-field pl-33 ${error ? 'border-red-500' : ''}`}
                   placeholder="Enter your email address"
                   disabled={isLoading}
                 />
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
             </div>
 
@@ -176,7 +178,7 @@ const ForgotPasswordPage: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Contact support at{' '}
                 <a href="mailto:support@ksi.iub.edu.bd" className="text-primary hover:text-purple-700">
-                  support@ksi.iub.edu.bd
+                  +8809612939393 (Ext: 3810)
                 </a>
               </p>
             </div>
