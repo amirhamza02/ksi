@@ -29,9 +29,11 @@ export interface AcademicInfo {
 }
 
 export interface Occupation {
+    
     userId: number;
     profession?: string;
     institution?: string;
+    institute?: string;
     department?: string;
     fromDate?: string; // ISO date string
     toDate?: string;   // ISO date string
