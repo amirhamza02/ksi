@@ -24,6 +24,12 @@ export interface ChangePasswordData {
   newPassword: string;
 }
 
+export interface ResetPasswordData {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface AuthContextType {
   user: User | null;
   login: (userName: string, password: string) => Promise<boolean>;
