@@ -58,6 +58,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data } = await api.post('/Auth/authentication', { userName, password });
       console.log(" response data ", data);
       
+      if (!data || !data.token || !data.isAuthSuccessful) {
+        throw new Error('userName or password is incorrect');
+      }
       // Save both token and user data
       setAuthToken(data.token);
       localStorage.setItem('authUser', JSON.stringify(data.user));

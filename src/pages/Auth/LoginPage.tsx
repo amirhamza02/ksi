@@ -49,6 +49,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true)
     try {
       const success = await login(formData.userName, formData.password)
+      console.log('Login success:', success)
       if (success) {
         navigate('/dashboard')
       } else {
