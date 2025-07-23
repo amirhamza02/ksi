@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage'
 import ProfilePage from './pages/Profile/ProfilePage'
 import CoursePage from './pages/Course/CoursePage'
 import ProtectedRoute from './components/ProtectedRoute'
+import ResetPassword from './pages/Auth/ResetPassword'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardPage />
